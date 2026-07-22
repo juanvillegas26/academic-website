@@ -1,4 +1,5 @@
----layout: course
+---
+layout: course
 title: Computer-Aided Electronic Circuit and System Design
 course_id: 530202016-530202028
 description: >
