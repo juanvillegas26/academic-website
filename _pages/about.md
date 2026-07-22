@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='https://www.itm.edu.co/'>Intitución Universitaria ITM</a> · Ph.D. Candidate at Universidad Nacional de Colombia
+subtitle: <a href='https://www.itm.edu.co/'>Institución Universitaria ITM</a> · Ph.D. Candidate at Universidad Nacional de Colombia
 
 profile:
   align: right
