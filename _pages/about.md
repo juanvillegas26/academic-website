@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Motto. Etc.
+subtitle: <a href='https://www.itm.edu.co/'>Instituto Tecnológico Metropolitano</a> · Ph.D. Candidate at Universidad Nacional de Colombia
 
 profile:
   align: right
