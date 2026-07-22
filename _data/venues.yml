@@ -1,9 +1,9 @@
-"AJP":
-  url: https://aapt.scitation.org/journal/ajp
+"CEIPA":
+  url: https://repositorio.ceipa.edu.co/entities/publication/5aa6775f-b77e-4595-826a-459eeee81b76
   color: "#00369f"
 
-"PhysRev":
-  url: https://journals.aps.org/
+#"PhysRev":
+#  url: https://journals.aps.org/
 
 "Vision":
   color: "#009f36"
