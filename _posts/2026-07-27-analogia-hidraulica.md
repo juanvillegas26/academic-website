@@ -13,7 +13,7 @@ En esta entrada explicamos cómo se relaciona la presión y el flujo de agua con
 
 Mueve los controles deslizantes a continuación para observar el comportamiento en tiempo real:
 
-<iframe src="/assets/interactive/analogia_hidraulica.html" width="100%" height="600px" style="border:1px solid #ccc; border-radius: 8px;"></iframe>
+<iframe src="assets/interactive/analogia_hidraulica.html" width="100%" height="600px" style="border:1px solid #ccc; border-radius: 8px;"></iframe> 
 
 ---
 
