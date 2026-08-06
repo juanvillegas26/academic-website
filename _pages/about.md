@@ -37,4 +37,3 @@ Advanced Control Systems: Sliding-Mode Control (SMC), adaptive control, and opti
 
 Renewable Energy & Microgrids: Maximum Power Point Tracking (MPPT) strategies for PV and wind systems, smart reconfiguration, and hybrid storage integration.
 
-E-Mobility & Open Innovation: Hardware development for electric vehicles, sustainable railway/fluvial transport, and interactive educational tools for engineering pedagogy.
