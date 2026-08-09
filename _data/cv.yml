@@ -5,7 +5,6 @@ cv:
   location: Medellín, Colombia
   image: ""
   summary: Electronic Engineer, M.Sc. in Automation and Industrial Control, Ph.D. Candidate in Engineering – Automation, and Associate Researcher recognized by Minciencias. Specialist in power electronics, control of switched-mode converters, renewable energy integration, and educational hardware.
-
   social_networks:
     - network: ORCID
       username: "0000-0001-8409-7833"
@@ -13,14 +12,12 @@ cv:
       username: juanpablovillegas
     - network: LinkedIn
       username: juanpablovillegas
-
   address:
     street: Carrera 31 54-10
     city: Medellín
     region: Antioquia
     postalCode: 050034
     countryCode: CO
-
   sections:
     Education:
       - institution: Universidad Nacional de Colombia
@@ -31,7 +28,6 @@ cv:
         end_date: Present
         highlights:
           - Focus on advanced control, energy management systems, and microgrids.
-
       - institution: Instituto Tecnológico Metropolitano (ITM)
         location: Medellín, Colombia
         url: https://www.itm.edu.co/
@@ -41,7 +37,6 @@ cv:
         end_date: 2019-01-01
         highlights:
           - "Thesis: Optimization methodology for sliding-mode control of energy storage systems to extend battery lifespan."
-
       - institution: Instituto Tecnológico Metropolitano (ITM)
         location: Medellín, Colombia
         url: https://www.itm.edu.co/
@@ -52,7 +47,6 @@ cv:
         highlights:
           - Professional License AN206-105671.
           - "Thesis: Design and implementation of a vector control system for brushless DC motors applied to robotics."
-
       - institution: Instituto Tecnológico Metropolitano (ITM)
         location: Medellín, Colombia
         url: https://www.itm.edu.co/
@@ -62,7 +56,6 @@ cv:
         end_date: 2011-01-01
         highlights:
           - "Thesis: Scanning sonar for autonomous robotic agent navigation."
-
     Experience:
       - company: Instituto Tecnológico Metropolitano (ITM)
         position: Assistant Professor / Docente Ocasional
@@ -73,21 +66,18 @@ cv:
         highlights:
           - Design of Hardware-in-the-Loop (HIL) systems for educational and research labs.
           - Research lead in renewable energy, microgrids, and power converter design.
-
       - company: Institución Universitaria Pascual Bravo
         position: Adjunct Professor / Researcher
         location: Medellín, Colombia
         start_date: 2018-01-01
         end_date: 2019-01-01
         summary: Taught courses in Applied Software, Servomechanisms, and Electronic Labs. Led R&D activities in renewable energy.
-
       - company: Trazabilidad Global S.A.S.
         position: Hardware & Software Integration Engineer
         location: Medellín, Colombia
         start_date: 2014-01-01
         end_date: 2017-01-01
         summary: Developed embedded GTPC solutions for public transit telemetry and automated weighing platforms for agro-industrial applications.
-
     Awards:
       - title: Honourable Mention
         authors:
@@ -95,14 +85,12 @@ cv:
         date: 2026-04-01
         awarder: ITM
         summary: Institutional award granted for outstanding research and academic contribution.
-
       - title: Honorable Mention for Research Work
         authors:
           - Consejo de la Facultad de Ingenierías, ITM
         date: 2012-09-19
         awarder: ITM
         summary: Granted by Resolution No. 529 for outstanding products developed within research seedbeds.
-
     Publications:
       - title: "Battery Supporting device to reduce current transients: Co-design of the power stage and an adaptive control"
         authors:
@@ -116,7 +104,6 @@ cv:
         releaseDate: 2025-01-01
         url: https://doi.org/10.1016/j.rineng.2025.105083
         summary: Co-design of a Cuk-based power converter and adaptive sliding mode controller to mitigate battery degradation in hybrid storage systems.
-
       - title: "Cost-effective and versatile Hardware-in-the-Loop system for DC/DC converter emulation in education and research"
         authors:
           - Juan Pablo Villegas Ceballos
@@ -129,7 +116,6 @@ cv:
         releaseDate: 2025-01-01
         url: https://doi.org/10.1016/j.ohx.2025.e00701
         summary: Development of an open-hardware HIL setup designed for emulating switching converters in academic power electronics courses.
-
       - title: "El transporte férreo y fluvial colombiano: prospectiva hacia la electromovilidad"
         authors:
           - Juan Pablo Villegas Ceballos
@@ -138,25 +124,20 @@ cv:
         publisher: Editorial CEIPA (Book)
         releaseDate: 2023-01-01
         summary: Research book evaluating the penetration and impact of electromobility in Colombian river and railway transportation networks.
-
     Skills:
       - name: Power Electronics & Control
         level: Expert
         icon: fa-solid fa-bolt
         keywords: "Sliding Mode Control, Adaptive Control, Interleaved Converters, Microinverters, MPPT, Hardware-in-the-Loop (HIL)"
-
       - name: Programming & Tools
         level: Advanced
         icon: fa-solid fa-code
         keywords: "MATLAB/Simulink, Embedded C/C++, DSP (TMS320F28335), Python, HTML5/JS Interactive Tools, PCB Design (LPKF)"
-
     Languages:
       - name: Spanish
         summary: Native speaker
-
       - name: English
         summary: B2 - Professional Working Proficiency
-
     Interests:
       - name: Research & Pedagogy
         icon: fa-solid fa-graduation-cap
