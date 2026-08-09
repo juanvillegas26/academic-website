@@ -84,9 +84,10 @@ schedule:
 
 ## Course Overview
 
-The **Power Electronics** (*Electrónica de Potencia*) course provides students in Electronic Engineering with the skills needed to analyze, model, simulate, design, and implement power electronic converters to optimize electrical energy flow in industrial contexts. 
+The **Power Electronics** (_Electrónica de Potencia_) course provides students in Electronic Engineering with the skills needed to analyze, model, simulate, design, and implement power electronic converters to optimize electrical energy flow in industrial contexts.
 
 ### Key Learning Outcomes (ABET Alignment)
+
 - **RA1 (High Contribution - A):** Ability to identify, formulate, and solve complex engineering problems by applying principles of engineering, science, and mathematics.
 - **RA2 (High Contribution - A):** Ability to apply engineering design to produce solutions that meet specified needs with consideration of public health, safety, and welfare, as well as global, cultural, social, environmental, and economic factors.
 - **RA3 (High Contribution - A):** Ability to develop and conduct appropriate experimentation, analyze and interpret data, and use engineering judgment to draw conclusions.
@@ -114,26 +115,28 @@ The **Power Electronics** (*Electrónica de Potencia*) course provides students 
 
 ## Grading Scheme
 
-| Assessment Strategy | Weight (%) | Description & Instrumentation |
-| :--- | :---: | :--- |
-| **Diagnostic Prerequisites Assessment** | **0%** | Diagnostic test on physics and circuit prerequisites (Formative). |
-| **Experimental Laboratory Practices** | **50%** | **4 Practical Labs @ 12.5% each** covering Gate Drivers, Open-Loop DC/DC & DC/AC Converters, and Closed-Loop Control of DC/DC & DC/AC Converters. [cite_start]Evaluated via simulation, hardware assembly, and technical reports[cite: 105]. |
-| **Industrial Case Study (ABP)** | **20%** | [cite_start]Individual Problem-Based Learning assessment on an industrial application scenario, combining written design calculations, simulation, and oral technical defense[cite: 109]. |
-| **Final PBL Course Project** | **20%** | Collaborative team project involving problem formulation, topology selection, simulation, hardware prototype implementation, and final oral defense with rubric evaluation. |
-| **Independent Work & Portfolio** | **10%** | [cite_start]Cumulative evidence portfolio containing literature reading reports (datasheets/manuals), commented simulations, and self-assessments[cite: 109]. |
+| Assessment Strategy                     | Weight (%) | Description & Instrumentation                                                                                                                                                                                                                |
+| :-------------------------------------- | :--------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnostic Prerequisites Assessment** |   **0%**   | Diagnostic test on physics and circuit prerequisites (Formative).                                                                                                                                                                            |
+| **Experimental Laboratory Practices**   |  **50%**   | **4 Practical Labs @ 12.5% each** covering Gate Drivers, Open-Loop DC/DC & DC/AC Converters, and Closed-Loop Control of DC/DC & DC/AC Converters. [cite_start]Evaluated via simulation, hardware assembly, and technical reports[cite: 105]. |
+| **Industrial Case Study (ABP)**         |  **20%**   | [cite_start]Individual Problem-Based Learning assessment on an industrial application scenario, combining written design calculations, simulation, and oral technical defense[cite: 109].                                                    |
+| **Final PBL Course Project**            |  **20%**   | Collaborative team project involving problem formulation, topology selection, simulation, hardware prototype implementation, and final oral defense with rubric evaluation.                                                                  |
+| **Independent Work & Portfolio**        |  **10%**   | [cite_start]Cumulative evidence portfolio containing literature reading reports (datasheets/manuals), commented simulations, and self-assessments[cite: 109].                                                                                |
 
 ---
 
 ## Textbooks & References
 
 ### Books
-- Rashid, M. H., González, M. H. R. V., & Fernández, P. A. S. (2004). *Electrónica de potencia: Circuitos, dispositivos y aplicaciones*. [cite_start]Pearson Educación[cite: 116, 117].
-- Hart, D. W. (2011). *Power Electronics*. [cite_start]Tata McGraw-Hill Education[cite: 118].
-- Erickson, R. W., & Maksimovic, D. (2001). *Fundamentals of Power Electronics*. [cite_start]Springer[cite: 119].
-- Mohan, N., & Undeland, T. M. (2007). *Power Electronics: Converters, Applications, and Design*. [cite_start]John Wiley & Sons[cite: 120].
-- Mohan, N. (2003). *First Courses on Power Electronic and Drives*. [cite_start]MNPERE, Minneapolis[cite: 121].
-- Rashid, M. H. (2012). *Spice for Power Electronics and Electric Power*. [cite_start]CRC Press[cite: 122].
+
+- Rashid, M. H., González, M. H. R. V., & Fernández, P. A. S. (2004). _Electrónica de potencia: Circuitos, dispositivos y aplicaciones_. [cite_start]Pearson Educación[cite: 116, 117].
+- Hart, D. W. (2011). _Power Electronics_. [cite_start]Tata McGraw-Hill Education[cite: 118].
+- Erickson, R. W., & Maksimovic, D. (2001). _Fundamentals of Power Electronics_. [cite_start]Springer[cite: 119].
+- Mohan, N., & Undeland, T. M. (2007). _Power Electronics: Converters, Applications, and Design_. [cite_start]John Wiley & Sons[cite: 120].
+- Mohan, N. (2003). _First Courses on Power Electronic and Drives_. [cite_start]MNPERE, Minneapolis[cite: 121].
+- Rashid, M. H. (2012). _Spice for Power Electronics and Electric Power_. [cite_start]CRC Press[cite: 122].
 
 ### Specialized Databases & Journals
+
 - [cite_start]IEEE Xplore, ScienceDirect, Taylor & Francis, MDPI[cite: 138, 139].
-- [cite_start]*IEEE Transactions on Power Electronics* / *IEEE Robotics and Automation Magazine*[cite: 126].
+- [cite_start]_IEEE Transactions on Power Electronics_ / _IEEE Robotics and Automation Magazine_[cite: 126].

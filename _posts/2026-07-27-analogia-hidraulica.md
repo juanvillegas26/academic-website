@@ -26,5 +26,6 @@ Mueve los controles deslizantes a continuación para observar el comportamiento 
 ---
 
 ### ¿Cómo usar esta herramienta?
+
 1. **Aumenta la altura del tanque:** Observa cómo incrementa el diferencial de potencial (Voltaje).
 2. **Cierra la válvula:** Nota cómo aumenta la oposición al flujo (Resistencia).

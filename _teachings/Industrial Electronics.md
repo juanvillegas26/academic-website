@@ -109,7 +109,7 @@ schedule:
 
 ## Textbooks & References
 
-- Boylestad, R. L., & Nashelsky, L. (2003). *Electronic Devices and Circuit Theory*. [cite_start]Pearson Education[cite: 3657].
-- Hart, D. W. (2001). *Power Electronics*. [cite_start]McGraw-Hill / Pearson Education[cite: 3658].
-- Mohan, N., Undeland, T. M., & Robbins, W. P. (2009). *Power Electronics: Converters, Applications, and Design*. [cite_start]Wiley / McGraw-Hill[cite: 3659].
-- Rashid, M. H. (2004). *Power Electronics: Circuits, Devices, and Applications*. [cite_start]Pearson Education[cite: 3660].
+- Boylestad, R. L., & Nashelsky, L. (2003). _Electronic Devices and Circuit Theory_. [cite_start]Pearson Education[cite: 3657].
+- Hart, D. W. (2001). _Power Electronics_. [cite_start]McGraw-Hill / Pearson Education[cite: 3658].
+- Mohan, N., Undeland, T. M., & Robbins, W. P. (2009). _Power Electronics: Converters, Applications, and Design_. [cite_start]Wiley / McGraw-Hill[cite: 3659].
+- Rashid, M. H. (2004). _Power Electronics: Circuits, Devices, and Applications_. [cite_start]Pearson Education[cite: 3660].
