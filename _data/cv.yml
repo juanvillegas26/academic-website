@@ -15,7 +15,7 @@ cv:
       username: juanpablovillegas
 
   address:
-    street: Carrera 31 #54-10
+    street: Carrera 31 54-10
     city: Medellín
     region: Antioquia
     postalCode: 050034
@@ -25,9 +25,9 @@ cv:
     Education:
       - institution: Universidad Nacional de Colombia
         location: Medellín, Colombia
-        area: Engineering – Automation
+        area: Engineering
         studyType: Ph.D. Candidate
-        start_date: 2022
+        start_date: 2022-01-01
         end_date: Present
         highlights:
           - Focus on advanced control, energy management systems, and microgrids.
@@ -37,8 +37,8 @@ cv:
         url: https://www.itm.edu.co/
         area: Automation and Industrial Control
         studyType: Master of Science (M.Sc.)
-        start_date: 2016
-        end_date: 2019
+        start_date: 2016-01-01
+        end_date: 2019-01-01
         highlights:
           - "Thesis: Optimization methodology for sliding-mode control of energy storage systems to extend battery lifespan."
 
@@ -47,8 +47,8 @@ cv:
         url: https://www.itm.edu.co/
         area: Electronic Engineering
         studyType: Bachelor of Engineering (B.Eng.)
-        start_date: 2012
-        end_date: 2014
+        start_date: 2012-01-01
+        end_date: 2014-01-01
         highlights:
           - Professional License AN206-105671.
           - "Thesis: Design and implementation of a vector control system for brushless DC motors applied to robotics."
@@ -58,8 +58,8 @@ cv:
         url: https://www.itm.edu.co/
         area: Electronic Technology
         studyType: Associate Degree (Technology)
-        start_date: 2008
-        end_date: 2011
+        start_date: 2008-01-01
+        end_date: 2011-01-01
         highlights:
           - "Thesis: Scanning sonar for autonomous robotic agent navigation."
 
@@ -67,7 +67,7 @@ cv:
       - company: Instituto Tecnológico Metropolitano (ITM)
         position: Assistant Professor / Docente Ocasional
         location: Medellín, Colombia
-        start_date: 2020
+        start_date: 2020-01-01
         end_date: Present
         summary: Teaching undergraduate courses in Power Electronics, Industrial Electronics, Continuous and Discrete Control Systems, and Control of Switched Converters.
         highlights:
@@ -77,15 +77,15 @@ cv:
       - company: Institución Universitaria Pascual Bravo
         position: Adjunct Professor / Researcher
         location: Medellín, Colombia
-        start_date: 2018
-        end_date: 2019
+        start_date: 2018-01-01
+        end_date: 2019-01-01
         summary: Taught courses in Applied Software, Servomechanisms, and Electronic Labs. Led R&D activities in renewable energy.
 
       - company: Trazabilidad Global S.A.S.
         position: Hardware & Software Integration Engineer
         location: Medellín, Colombia
-        start_date: 2014
-        end_date: 2017
+        start_date: 2014-01-01
+        end_date: 2017-01-01
         summary: Developed embedded GTPC solutions for public transit telemetry and automated weighing platforms for agro-industrial applications.
 
     Awards:
