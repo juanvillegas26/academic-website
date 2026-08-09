@@ -1,576 +1,625 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Simulador Interactivo: La Analogía Hidráulica</title>
     <style>
-        :root {
-            /* Paleta Institucional ITM */
-            --itm-green: #00875A;
-            --itm-dark: #2D2D30;
-            --itm-light: #F9F9F9;
-            --water-color: #00A8E8;
-            --border-color: #E0E0E0;
-        }
-        body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: var(--itm-light);
-            color: var(--itm-dark);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        header {
-            background-color: var(--itm-green);
-            color: white;
-            width: 100%;
-            text-align: center;
-            padding: 30px 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
-        header h1 {
-            margin: 0 0 10px 0;
-            font-size: 2.2rem;
-            letter-spacing: 0.5px;
-        }
-        header p {
-            margin: 0;
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
+      :root {
+        /* Paleta Institucional ITM */
+        --itm-green: #00875a;
+        --itm-dark: #2d2d30;
+        --itm-light: #f9f9f9;
+        --water-color: #00a8e8;
+        --border-color: #e0e0e0;
+      }
+      body {
+        margin: 0;
+        font-family: "Arial", sans-serif;
+        background-color: var(--itm-light);
+        color: var(--itm-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      header {
+        background-color: var(--itm-green);
+        color: white;
+        width: 100%;
+        text-align: center;
+        padding: 30px 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+      }
+      header h1 {
+        margin: 0 0 10px 0;
+        font-size: 2.2rem;
+        letter-spacing: 0.5px;
+      }
+      header p {
+        margin: 0;
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        width: 90%;
+        max-width: 1200px;
+        margin: 40px auto;
+        gap: 40px;
+      }
+      .controls {
+        flex: 1;
+        background: white;
+        padding: 35px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        border: 1px solid var(--border-color);
+      }
+      .simulation {
+        flex: 2;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+      }
+      canvas {
+        max-width: 100%;
+        height: auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+      }
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .control-group label {
+        font-weight: bold;
+        font-size: 1.15rem;
+        color: var(--itm-dark);
+        display: flex;
+        justify-content: space-between;
+      }
+      .control-group label span {
+        color: var(--itm-green);
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 26px;
+        width: 26px;
+        border-radius: 50%;
+        background: var(--itm-green);
+        cursor: pointer;
+        margin-top: -9px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: transform 0.1s;
+      }
+      input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 8px;
+        cursor: pointer;
+        background: #e0e0e0;
+        border-radius: 4px;
+      }
+      input[type="range"]:focus {
+        outline: none;
+      }
+      .result {
+        margin-top: auto;
+        background: var(--itm-light);
+        padding: 25px;
+        border-radius: 8px;
+        text-align: center;
+        border: 2px solid var(--itm-green);
+      }
+      .result h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        color: var(--itm-dark);
+      }
+      .formula {
+        font-size: 1.1rem;
+        color: #7f8c8d;
+        margin-top: 8px;
+        font-style: italic;
+      }
+      .result .value {
+        font-size: 3rem;
+        font-weight: bold;
+        color: var(--itm-green);
+        margin-top: 15px;
+      }
+      footer {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto 40px auto;
+      }
+      .explanation-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        border-left: 8px solid var(--itm-green);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border-top: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+      }
+      .explanation-card h3 {
+        margin-top: 0;
+        color: var(--itm-green);
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+      }
+      .explanation-card p {
+        line-height: 1.6;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+      }
+      /* Sección de Autor */
+      .author-info {
+        display: flex;
+        align-items: center;
+        background: white;
+        padding: 20px 30px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        gap: 25px;
+        flex-wrap: wrap;
+      }
+      .logo-placeholder {
+        width: 70px;
+        height: 70px;
+        border: 2px dashed #95a5a6;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        text-align: center;
+        background: var(--itm-light);
+        font-weight: bold;
+      }
+      .author-details {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .author-details p {
+        margin: 0;
+        font-size: 1.15rem;
+        color: var(--itm-dark);
+      }
+      .youtube-btn {
+        display: inline-block;
+        background-color: #ff0000;
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 1rem;
+        width: fit-content;
+        transition: background 0.2s, transform 0.1s;
+        box-shadow: 0 2px 5px rgba(255, 0, 0, 0.3);
+      }
+      .youtube-btn:hover {
+        background-color: #cc0000;
+        transform: scale(1.05);
+      }
+
+      @media (max-width: 900px) {
         .container {
-            display: flex;
-            flex-direction: row;
-            width: 90%;
-            max-width: 1200px;
-            margin: 40px auto;
-            gap: 40px;
+          flex-direction: column;
         }
-        .controls {
-            flex: 1;
-            background: white;
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            border: 1px solid var(--border-color);
-        }
+        .controls,
         .simulation {
-            flex: 2;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
+          width: 100%;
+          box-sizing: border-box;
         }
-        canvas {
-            max-width: 100%;
-            height: auto;
-            background-color: #FFFFFF;
-            border-radius: 8px;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .control-group label {
-            font-weight: bold;
-            font-size: 1.15rem;
-            color: var(--itm-dark);
-            display: flex;
-            justify-content: space-between;
-        }
-        .control-group label span {
-            color: var(--itm-green);
-        }
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 26px;
-            width: 26px;
-            border-radius: 50%;
-            background: var(--itm-green);
-            cursor: pointer;
-            margin-top: -9px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
-        }
-        input[type=range]::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            cursor: pointer;
-            background: #E0E0E0;
-            border-radius: 4px;
-        }
-        input[type=range]:focus {
-            outline: none;
-        }
-        .result {
-            margin-top: auto;
-            background: var(--itm-light);
-            padding: 25px;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px solid var(--itm-green);
-        }
-        .result h2 {
-            margin: 0;
-            font-size: 1.4rem;
-            color: var(--itm-dark);
-        }
-        .formula {
-            font-size: 1.1rem;
-            color: #7F8C8D;
-            margin-top: 8px;
-            font-style: italic;
-        }
-        .result .value {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--itm-green);
-            margin-top: 15px;
-        }
-        footer {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto 40px auto;
-        }
-        .explanation-card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            border-left: 8px solid var(--itm-green);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            border-top: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-        }
-        .explanation-card h3 {
-            margin-top: 0;
-            color: var(--itm-green);
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-        .explanation-card p {
-            line-height: 1.6;
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-        }
-        /* Sección de Autor */
         .author-info {
-            display: flex;
-            align-items: center;
-            background: white;
-            padding: 20px 30px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            gap: 25px;
-            flex-wrap: wrap;
-        }
-        .logo-placeholder {
-            width: 70px;
-            height: 70px;
-            border: 2px dashed #95A5A6;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.85rem;
-            color: #7F8C8D;
-            text-align: center;
-            background: var(--itm-light);
-            font-weight: bold;
+          justify-content: center;
+          text-align: center;
         }
         .author-details {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+          align-items: center;
         }
-        .author-details p {
-            margin: 0;
-            font-size: 1.15rem;
-            color: var(--itm-dark);
-        }
-        .youtube-btn {
-            display: inline-block;
-            background-color: #FF0000;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 1rem;
-            width: fit-content;
-            transition: background 0.2s, transform 0.1s;
-            box-shadow: 0 2px 5px rgba(255,0,0,0.3);
-        }
-        .youtube-btn:hover {
-            background-color: #CC0000;
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 900px) {
-            .container {
-                flex-direction: column;
-            }
-            .controls, .simulation {
-                width: 100%;
-                box-sizing: border-box;
-            }
-            .author-info {
-                justify-content: center;
-                text-align: center;
-            }
-            .author-details {
-                align-items: center;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <header>
-        <h1>Simulador Interactivo: La Analogía Hidráulica</h1>
-        <p>Comprende los conceptos básicos de los circuitos eléctricos a través del flujo del agua.</p>
+      <h1>Simulador Interactivo: La Analogía Hidráulica</h1>
+      <p>
+        Comprende los conceptos básicos de los circuitos eléctricos a través
+        del flujo del agua.
+      </p>
     </header>
 
     <main class="container">
-        <!-- Panel Izquierdo: Controles -->
-        <div class="controls">
-            <div class="control-group">
-                <label for="voltaje">Voltaje (Presión) <span><span id="v-val">5.0</span> V</span></label>
-                <input type="range" id="voltaje" min="1" max="10" step="0.1" value="5">
-            </div>
-            <div class="control-group">
-                <label for="resistencia">Resistencia (Obstrucción) <span><span id="r-val">5.0</span> Ω</span></label>
-                <input type="range" id="resistencia" min="1" max="10" step="0.1" value="5">
-            </div>
-            
-            <div class="result">
-                <h2>Corriente Resultante</h2>
-                <div class="formula">I = V / R</div>
-                <div class="value" id="corriente-val">1.00 A</div>
-            </div>
+      <!-- Panel Izquierdo: Controles -->
+      <div class="controls">
+        <div class="control-group">
+          <label for="voltaje"
+            >Voltaje (Presión) <span><span id="v-val">5.0</span> V</span></label
+          >
+          <input
+            type="range"
+            id="voltaje"
+            min="1"
+            max="10"
+            step="0.1"
+            value="5"
+          />
+        </div>
+        <div class="control-group">
+          <label for="resistencia"
+            >Resistencia (Obstrucción)
+            <span><span id="r-val">5.0</span> Ω</span></label
+          >
+          <input
+            type="range"
+            id="resistencia"
+            min="1"
+            max="10"
+            step="0.1"
+            value="5"
+          />
         </div>
 
-        <!-- Panel Derecho: Simulación -->
-        <div class="simulation">
-            <canvas id="simCanvas" width="800" height="600"></canvas>
+        <div class="result">
+          <h2>Corriente Resultante</h2>
+          <div class="formula">I = V / R</div>
+          <div class="value" id="corriente-val">1.00 A</div>
         </div>
+      </div>
+
+      <!-- Panel Derecho: Simulación -->
+      <div class="simulation">
+        <canvas id="simCanvas" width="800" height="600"></canvas>
+      </div>
     </main>
 
     <!-- Sección Inferior: Explicación Pedagógica -->
     <footer>
-        <div class="explanation-card">
-            <h3>¿Cómo funciona esta analogía?</h3>
-            <p><strong>El Voltaje (V)</strong> equivale a la altura o presión del agua en el tanque. A mayor nivel de agua, existe más "presión" empujando el líquido hacia abajo.</p>
-            <p><strong>La Resistencia (R)</strong> está representada por la válvula en la tubería. Al cerrarla (aumentar la resistencia), dificultamos el paso del agua, estrechando el conducto.</p>
-            <p><strong>La Corriente (I)</strong> es la cantidad de agua que logra fluir por la tubería en un tiempo determinado, lo cual se evidencia en la cantidad de partículas y en qué tan rápido hacen girar el molino.</p>
-            <p style="margin-bottom:0;"><em>Conclusión (Ley de Ohm):</em> El flujo total (Corriente) aumenta si aplicamos más fuerza (Voltaje) y disminuye si aplicamos más obstrucción (Resistencia).</p>
+      <div class="explanation-card">
+        <h3>¿Cómo funciona esta analogía?</h3>
+        <p>
+          <strong>El Voltaje (V)</strong> equivale a la altura o presión del
+          agua en el tanque. A mayor nivel de agua, existe más "presión"
+          empujando el líquido hacia abajo.
+        </p>
+        <p>
+          <strong>La Resistencia (R)</strong> está representada por la válvula
+          en la tubería. Al cerrarla (aumentar la resistencia), dificultamos el
+          paso del agua, estrechando el conducto[...]
+        </p>
+        <p>
+          <strong>La Corriente (I)</strong> es la cantidad de agua que logra
+          fluir por la tubería en un tiempo determinado, lo cual se evidencia
+          en la cantidad de partículas y en qué tan [...]
+        </p>
+        <p style="margin-bottom: 0">
+          <em>Conclusión (Ley de Ohm):</em> El flujo total (Corriente) aumenta
+          si aplicamos más fuerza (Voltaje) y disminuye si aplicamos más
+          obstrucción (Resist[...]
+        </p>
+      </div>
+
+      <div class="author-info" style="margin-top: 25px">
+        <div class="logo-placeholder">[Mi Logo]</div>
+        <div class="author-details">
+          <p>
+            Desarrollado por: <strong>Juan Pablo Villegas Ceballos</strong>
+          </p>
+          <a href="#" class="youtube-btn">▶ [Enlace a mi Canal de YouTube]</a>
         </div>
-        
-        <div class="author-info" style="margin-top: 25px;">
-            <div class="logo-placeholder">[Mi Logo]</div>
-            <div class="author-details">
-                <p>Desarrollado por: <strong>Juan Pablo Villegas Ceballos</strong></p>
-                <a href="#" class="youtube-btn">▶ [Enlace a mi Canal de YouTube]</a>
-            </div>
-        </div>
+      </div>
     </footer>
 
     <script>
-        const canvas = document.getElementById('simCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        const vSlider = document.getElementById('voltaje');
-        const rSlider = document.getElementById('resistencia');
-        const vVal = document.getElementById('v-val');
-        const rVal = document.getElementById('r-val');
-        const iText = document.getElementById('corriente-val');
+      const canvas = document.getElementById("simCanvas");
+      const ctx = canvas.getContext("2d");
 
-        let V = 5;
-        let R = 5;
-        let I = 1;
+      const vSlider = document.getElementById("voltaje");
+      const rSlider = document.getElementById("resistencia");
+      const vVal = document.getElementById("v-val");
+      const rVal = document.getElementById("r-val");
+      const iText = document.getElementById("corriente-val");
 
-        // Actualizar valores en UI y lógica
-        function updateValues() {
-            V = parseFloat(vSlider.value);
-            R = parseFloat(rSlider.value);
-            vVal.innerText = V.toFixed(1);
-            rVal.innerText = R.toFixed(1);
-            
-            I = V / R;
-            iText.innerText = I.toFixed(2) + " A";
+      let V = 5;
+      let R = 5;
+      let I = 1;
+
+      // Actualizar valores en UI y lógica
+      function updateValues() {
+        V = parseFloat(vSlider.value);
+        R = parseFloat(rSlider.value);
+        vVal.innerText = V.toFixed(1);
+        rVal.innerText = R.toFixed(1);
+
+        I = V / R;
+        iText.innerText = I.toFixed(2) + " A";
+      }
+
+      vSlider.addEventListener("input", updateValues);
+      rSlider.addEventListener("input", updateValues);
+      updateValues();
+
+      // Lógica de partículas (Agua)
+      let particles = [];
+      let wheelAngle = 0;
+
+      function spawnParticles() {
+        // La cantidad de flujo es proporcional a la Corriente (I)
+        let spawnRate = I * 1.5;
+        let numToSpawn = Math.floor(spawnRate);
+        if (Math.random() < spawnRate - numToSpawn) numToSpawn++;
+
+        for (let i = 0; i < numToSpawn; i++) {
+          particles.push({
+            x: 105 + Math.random() * 40,
+            y: 300,
+            state: 1, // 1: vertical, 2: horizontal, 3: cayendo
+            offset: Math.random(), // Posición relativa en el ancho del tubo
+          });
         }
+      }
 
-        vSlider.addEventListener('input', updateValues);
-        rSlider.addEventListener('input', updateValues);
-        updateValues();
+      function updatePhysics() {
+        // La velocidad visual del agua aumenta con el Voltaje (presión)
+        let speed = 2.5 + V * 0.6;
 
-        // Lógica de partículas (Agua)
-        let particles = [];
-        let wheelAngle = 0;
+        // El giro del molino es proporcional a la corriente y la velocidad del impacto
+        wheelAngle += I * 0.008 * speed;
 
-        function spawnParticles() {
-            // La cantidad de flujo es proporcional a la Corriente (I)
-            let spawnRate = I * 1.5; 
-            let numToSpawn = Math.floor(spawnRate);
-            if (Math.random() < (spawnRate - numToSpawn)) numToSpawn++;
-            
-            for(let i=0; i<numToSpawn; i++) {
-                particles.push({
-                    x: 105 + Math.random() * 40,
-                    y: 300,
-                    state: 1, // 1: vertical, 2: horizontal, 3: cayendo
-                    offset: Math.random() // Posición relativa en el ancho del tubo
-                });
+        let closedAmt = (R - 1) / 9; // Porcentaje de cierre de la válvula (0 a 1)
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          let p = particles[i];
+
+          if (p.state === 1) {
+            // Caída vertical
+            p.y += speed;
+            let cornerY = 450 + 40 * p.offset + 5;
+            if (p.y >= cornerY) {
+              p.y = cornerY;
+              p.state = 2; // Pasa a horizontal
             }
-        }
+          } else if (p.state === 2) {
+            // Flujo horizontal
+            p.x += speed;
 
-        function updatePhysics() {
-            // La velocidad visual del agua aumenta con el Voltaje (presión)
-            let speed = 2.5 + V * 0.6; 
-            
-            // El giro del molino es proporcional a la corriente y la velocidad del impacto
-            wheelAngle += I * 0.008 * speed; 
-            
-            let closedAmt = (R - 1) / 9; // Porcentaje de cierre de la válvula (0 a 1)
-            
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                
-                if (p.state === 1) { // Caída vertical
-                    p.y += speed;
-                    let cornerY = 450 + 40 * p.offset + 5;
-                    if (p.y >= cornerY) {
-                        p.y = cornerY;
-                        p.state = 2; // Pasa a horizontal
-                    }
-                } else if (p.state === 2) { // Flujo horizontal
-                    p.x += speed;
-                    
-                    // Lógica de estrechamiento al pasar por la válvula
-                    if (p.x > 380 && p.x < 420) {
-                        let valveOpenTop = 450 + 45 * closedAmt; 
-                        let allowedHeight = 500 - valveOpenTop - 5;
-                        let targetY = valveOpenTop + allowedHeight * p.offset + 2.5;
-                        p.y += (targetY - p.y) * 0.4; // Efecto de succión/compresión
-                    } else if (p.x >= 420 && p.x < 680) {
-                        let targetY = 450 + 40 * p.offset + 5;
-                        p.y += (targetY - p.y) * 0.1; // Restaura su amplitud normal
-                    } else if (p.x >= 680) {
-                        p.state = 3; // Sale del tubo
-                    }
-                } else if (p.state === 3) { // Cayendo del molino
-                    p.y += speed * 1.2;
-                    p.x += speed * 0.15;
-                    if (p.y > 600) {
-                        particles.splice(i, 1);
-                    }
-                }
+            // Lógica de estrechamiento al pasar por la válvula
+            if (p.x > 380 && p.x < 420) {
+              let valveOpenTop = 450 + 45 * closedAmt;
+              let allowedHeight = 500 - valveOpenTop - 5;
+              let targetY = valveOpenTop + allowedHeight * p.offset + 2.5;
+              p.y += (targetY - p.y) * 0.4; // Efecto de succión/compresión
+            } else if (p.x >= 420 && p.x < 680) {
+              let targetY = 450 + 40 * p.offset + 5;
+              p.y += (targetY - p.y) * 0.1; // Restaura su amplitud normal
+            } else if (p.x >= 680) {
+              p.state = 3; // Sale del tubo
             }
-        }
-
-        // --- Funciones de Dibujo ---
-
-        function drawBackground() {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Cuadrícula sutil tipo Blueprint/Ingeniería
-            ctx.strokeStyle = '#F0F0F0';
-            ctx.lineWidth = 1;
-            for(let i=0; i<=800; i+=40) {
-                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 600); ctx.stroke();
+          } else if (p.state === 3) {
+            // Cayendo del molino
+            p.y += speed * 1.2;
+            p.x += speed * 0.15;
+            if (p.y > 600) {
+              particles.splice(i, 1);
             }
-            for(let i=0; i<=600; i+=40) {
-                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(800, i); ctx.stroke();
-            }
+          }
         }
+      }
 
-        function drawTank() {
-            // Agua en el tanque (Altura = Voltaje)
-            ctx.fillStyle = 'rgba(0, 168, 232, 0.5)';
-            let waterH = (V / 10) * 180 + 20; 
-            ctx.fillRect(50, 300 - waterH, 150, waterH);
-            
-            // Bordes del tanque
-            ctx.strokeStyle = '#95A5A6';
-            ctx.lineWidth = 6;
-            ctx.lineJoin = 'round';
-            
-            ctx.beginPath();
-            ctx.moveTo(50, 80);
-            ctx.lineTo(50, 300);
-            ctx.lineTo(100, 300);
-            ctx.stroke();
+      // --- Funciones de Dibujo ---
 
-            ctx.beginPath();
-            ctx.moveTo(200, 80);
-            ctx.lineTo(200, 300);
-            ctx.lineTo(150, 300);
-            ctx.stroke();
-            
-            // Etiquetas
-            ctx.fillStyle = '#2D2D30';
-            ctx.font = 'bold 16px Arial';
-            ctx.fillText('Tanque (Fuente)', 65, 70);
-            
-            ctx.fillStyle = '#00875A';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Nivel = Presión', 215, 300 - waterH/2 + 5);
-            
-            ctx.strokeStyle = '#00875A';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(210, 300 - waterH/2);
-            ctx.lineTo(200, 300 - waterH/2);
-            ctx.stroke();
+      function drawBackground() {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Cuadrícula sutil tipo Blueprint/Ingeniería
+        ctx.strokeStyle = "#F0F0F0";
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 800; i += 40) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i, 600);
+          ctx.stroke();
         }
-
-        function drawPipe() {
-            // Fondo del tubo
-            ctx.fillStyle = '#ECF0F1';
-            ctx.fillRect(100, 300, 50, 150);
-            ctx.fillRect(100, 450, 550, 50);
-            
-            // Bordes del tubo
-            ctx.strokeStyle = '#7F8C8D';
-            ctx.lineWidth = 4;
-            
-            // Línea exterior
-            ctx.beginPath();
-            ctx.moveTo(100, 300);
-            ctx.lineTo(100, 500);
-            ctx.lineTo(650, 500);
-            ctx.stroke();
-            
-            // Línea interior
-            ctx.beginPath();
-            ctx.moveTo(150, 300);
-            ctx.lineTo(150, 450);
-            ctx.lineTo(650, 450);
-            ctx.stroke();
+        for (let i = 0; i <= 600; i += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, i);
+          ctx.lineTo(800, i);
+          ctx.stroke();
         }
+      }
 
-        function drawValve() {
-            let closedAmt = (R - 1) / 9; 
-            let valveY = 450 + 45 * closedAmt;
-            
-            // Bloque obstructivo de la válvula
-            ctx.fillStyle = '#E74C3C'; 
-            ctx.fillRect(390, 450, 20, valveY - 450);
-            
-            // Tallo de la válvula
-            ctx.fillStyle = '#C0392B';
-            ctx.fillRect(395, 410, 10, 40);
-            
-            // Manija giratoria
-            ctx.beginPath();
-            ctx.arc(400, 410, 18, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Etiquetas
-            ctx.fillStyle = '#2D2D30';
-            ctx.font = 'bold 16px Arial';
-            ctx.fillText('Válvula', 375, 385);
-            ctx.fillStyle = '#E74C3C';
-            ctx.font = '14px Arial';
-            ctx.fillText('Obstrucción', 362, 435);
+      function drawTank() {
+        // Agua en el tanque (Altura = Voltaje)
+        ctx.fillStyle = "rgba(0, 168, 232, 0.5)";
+        let waterH = (V / 10) * 180 + 20;
+        ctx.fillRect(50, 300 - waterH, 150, waterH);
+
+        // Bordes del tanque
+        ctx.strokeStyle = "#95A5A6";
+        ctx.lineWidth = 6;
+        ctx.lineJoin = "round";
+
+        ctx.beginPath();
+        ctx.moveTo(50, 80);
+        ctx.lineTo(50, 300);
+        ctx.lineTo(100, 300);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(200, 80);
+        ctx.lineTo(200, 300);
+        ctx.lineTo(150, 300);
+        ctx.stroke();
+
+        // Etiquetas
+        ctx.fillStyle = "#2D2D30";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText("Tanque (Fuente)", 65, 70);
+
+        ctx.fillStyle = "#00875A";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText("Nivel = Presión", 215, 300 - waterH / 2 + 5);
+
+        ctx.strokeStyle = "#00875A";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(210, 300 - waterH / 2);
+        ctx.lineTo(200, 300 - waterH / 2);
+        ctx.stroke();
+      }
+
+      function drawPipe() {
+        // Fondo del tubo
+        ctx.fillStyle = "#ECF0F1";
+        ctx.fillRect(100, 300, 50, 150);
+        ctx.fillRect(100, 450, 550, 50);
+
+        // Bordes del tubo
+        ctx.strokeStyle = "#7F8C8D";
+        ctx.lineWidth = 4;
+
+        // Línea exterior
+        ctx.beginPath();
+        ctx.moveTo(100, 300);
+        ctx.lineTo(100, 500);
+        ctx.lineTo(650, 500);
+        ctx.stroke();
+
+        // Línea interior
+        ctx.beginPath();
+        ctx.moveTo(150, 300);
+        ctx.lineTo(150, 450);
+        ctx.lineTo(650, 450);
+        ctx.stroke();
+      }
+
+      function drawValve() {
+        let closedAmt = (R - 1) / 9;
+        let valveY = 450 + 45 * closedAmt;
+
+        // Bloque obstructivo de la válvula
+        ctx.fillStyle = "#E74C3C";
+        ctx.fillRect(390, 450, 20, valveY - 450);
+
+        // Tallo de la válvula
+        ctx.fillStyle = "#C0392B";
+        ctx.fillRect(395, 410, 10, 40);
+
+        // Manija giratoria
+        ctx.beginPath();
+        ctx.arc(400, 410, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Etiquetas
+        ctx.fillStyle = "#2D2D30";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText("Válvula", 375, 385);
+        ctx.fillStyle = "#E74C3C";
+        ctx.font = "14px Arial";
+        ctx.fillText("Obstrucción", 362, 435);
+      }
+
+      function drawParticles() {
+        ctx.fillStyle = "#00A8E8";
+        for (let p of particles) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+          ctx.fill();
         }
+      }
 
-        function drawParticles() {
-            ctx.fillStyle = '#00A8E8';
-            for (let p of particles) {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-                ctx.fill();
-            }
+      function drawWheel() {
+        ctx.save();
+        ctx.translate(680, 475);
+        ctx.rotate(wheelAngle);
+
+        // Aro exterior
+        ctx.strokeStyle = "#D35400";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(0, 0, 45, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Aspas
+        for (let i = 0; i < 8; i++) {
+          ctx.save();
+          ctx.rotate((i * Math.PI) / 4);
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(45, 0);
+          ctx.stroke();
+
+          ctx.fillStyle = "#E67E22";
+          ctx.fillRect(35, -12, 16, 24);
+          ctx.restore();
         }
+        ctx.restore();
 
-        function drawWheel() {
-            ctx.save();
-            ctx.translate(680, 475);
-            ctx.rotate(wheelAngle);
-            
-            // Aro exterior
-            ctx.strokeStyle = '#D35400';
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.arc(0, 0, 45, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // Aspas
-            for(let i=0; i<8; i++) {
-                ctx.save();
-                ctx.rotate(i * Math.PI / 4);
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(45, 0);
-                ctx.stroke();
-                
-                ctx.fillStyle = '#E67E22';
-                ctx.fillRect(35, -12, 16, 24);
-                ctx.restore();
-            }
-            ctx.restore();
-            
-            // Soporte del molino
-            ctx.fillStyle = '#7F8C8D';
-            ctx.fillRect(670, 475, 20, 100);
-            
-            // Eje central
-            ctx.beginPath();
-            ctx.arc(680, 475, 8, 0, Math.PI*2);
-            ctx.fillStyle = '#2D2D30';
-            ctx.fill();
-            
-            // Etiquetas
-            ctx.fillStyle = '#2D2D30';
-            ctx.font = 'bold 16px Arial';
-            ctx.fillText('Molino (Carga)', 630, 595);
-            ctx.fillStyle = '#D35400';
-            ctx.font = '14px Arial';
-            ctx.fillText('Giro = Corriente', 685, 420);
-        }
+        // Soporte del molino
+        ctx.fillStyle = "#7F8C8D";
+        ctx.fillRect(670, 475, 20, 100);
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            spawnParticles();
-            updatePhysics();
-            
-            drawBackground();
-            drawTank();
-            drawPipe();
-            drawValve();
-            drawParticles();
-            drawWheel();
-            
-            requestAnimationFrame(draw);
-        }
+        // Eje central
+        ctx.beginPath();
+        ctx.arc(680, 475, 8, 0, Math.PI * 2);
+        ctx.fillStyle = "#2D2D30";
+        ctx.fill();
 
-        // Iniciar el bucle de animación
-        draw();
+        // Etiquetas
+        ctx.fillStyle = "#2D2D30";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText("Molino (Carga)", 630, 595);
+        ctx.fillStyle = "#D35400";
+        ctx.font = "14px Arial";
+        ctx.fillText("Giro = Corriente", 685, 420);
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        spawnParticles();
+        updatePhysics();
+
+        drawBackground();
+        drawTank();
+        drawPipe();
+        drawValve();
+        drawParticles();
+        drawWheel();
+
+        requestAnimationFrame(draw);
+      }
+
+      // Iniciar el bucle de animación
+      draw();
     </script>
-</body>
+  </body>
 </html>
