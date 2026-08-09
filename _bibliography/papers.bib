@@ -1,9 +1,6 @@
 ---
 ---
-
-@string{aps = {American Physical Society,}}
-
-@article{Villegas2026-3,
+@article{Lopez2026,
    abstract = {<p>This paper presents a comprehensive analysis of the design and simulation of an integrated electric propulsion system for small boats, with the purpose of optimizing river transport from an environmental and energy perspective. The research proposes a propulsion system that combines an electric motor, a lithium-ion battery-based storage system and a three-phase charger designed for in-port recharging processes. The system components were modeled and simulated using Matlab/Simulink, incorporating real operational data and navigation profiles adapted to typical Colombian river conditions, specifically in the Atrato River. The vessel operating profiles were defined in three main modes: maneuvering (5 knots), economic (12 knots) and maximum speed (27 knots). For each mode, critical variables such as required power, energy autonomy and the frequency of recharges needed on the river route were simulated. The results indicate that operating at low speeds maximizes energy autonomy, reduces the number of refueling stops and allows a shorter cumulative operating time, highlighting higher energy efficiency compared to higher speeds. The article highlights the importance of simulation in the preliminary design of electric propulsion systems, facilitating the optimization of configurations and parameter tuning prior to implementation.</p>},
    author = {Jose David Lopez Suarez and Juan Pablo Villegas Ceballos and Daniel Gonzalez Montoya and Cristian Escudero Quintero and Edwin Giovanny Paipa Sanabria},
    doi = {10.25043/19098642.284},
@@ -17,7 +14,7 @@
    year = {2026},
    preview = {Lopez_2026.png}
 }
-@article{Villegas20262,
+@article{Tobon2026,
    abstract = {<p>The main contribution of this work is a co-design process for buck DC/DC converters, aimed at facilitating the development of a system that meets performance specifications from the earliest stages. This process incorporates a cascade control strategy—featuring a PI regulator for the output voltage and a sliding-mode controller for the inductor current—and is implemented as a software tool that guides the designer in selecting off-the-shelf components, determining feasible ranges that balance cost, size, efficiency, and electrical performance. From an engineering perspective, the tool is modeled using component and sequence diagrams, ensuring modularity, traceability, and step-by-step validation between the electrical design and control modules. The validity of this design process is demonstrated through an application that uses two USB Type-C ports. The experimental and simulation results, obtained using commercially available components, confirm that even in the worst-case scenario, the closed-loop system meets all USB-PD specifications, exhibiting precise voltage regulation, fast dynamic response, and well-damped inductor current. Consequently, this work not only proposes a systematic and practical design method but also supports it with concrete evidence of its ability to generate robust, implementation-ready solutions.</p>},
    author = {Andrés Tobón and Sergio Ignacio Serna-Garcés and Carlos Andrés Ramos-Paja and Daniel González and Juan Pablo Villegas-Ceballos},
    doi = {10.3390/pr14132149},
@@ -29,6 +26,7 @@
    title = {Automated Co-Design Methodology for DC/DC Buck Power Stage and Sliding-Mode Controller to Meet Performance Specifications},
    volume = {14},
    year = {2026},
+   preview = {Tobon2026.png}
 }
 @article{Villegas2026,
    abstract = {<p>This work presents an integrated methodology for modeling, parameter tuning, and experimental emulation of Dual Active Bridge (DAB) converters aimed at detailed simulation, control design, and real-time emulation. This is needed to bridge the gap between theoretical modeling and practical implementation, enabling accurate prediction of converter behavior under realistic operating conditions and facilitating the development of control strategies. The study begins with the derivation of a nonlinear model including parasitic elements and transformer characteristics, enabling accurate representation of the converter’s dynamics across operating conditions. To address deviations caused by component tolerances, the model parameters are calibrated using a multi-algorithm optimization framework based on Particle Swarm Optimization, Grey Wolf Optimizer, Secretary Bird Optimization, and Whale Optimization, where the error between predicted and experimental waveforms is minimized. The comparative analysis allows selecting the most suitable optimization strategy based on statistical analyses. The model is also discretized and implemented on a Hardware-in-the-Loop (HIL) platform based on a high-performance microcontroller, enabling real-time emulation of the converter as a digital twin. Moreover, a control-oriented version of the model is presented and used to design a voltage controller, which is subsequently tested in both the HIL environment and on a real DAB converter prototype. Experimental results report differences between HIL and real prototype below 3.9% for currents and 4.45% for voltages in multiple operation conditions, demonstrating an accurate representation of the real power system. This methodology ensures low errors between theoretical, simulated, and experimental behavior, providing a framework for accurate modeling and controller design of DAB converters.</p>},
