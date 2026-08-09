@@ -1,10 +1,9 @@
 cv:
   name: Juan Pablo Villegas Ceballos
-  label: Professor
+  headline: Electronic Engineer, M.Sc. in Automation and Industrial Control, Ph.D. Candidate in Engineering – Automation, and Associate Researcher recognized by Minciencias. Specialist in power electronics, control of switched-mode converters, renewable energy integration, and educational hardware.
   email: juanvillegas@itm.edu.co
   location: Medellín, Colombia
-  image: ""
-  summary: Electronic Engineer, M.Sc. in Automation and Industrial Control, Ph.D. Candidate in Engineering – Automation, and Associate Researcher recognized by Minciencias. Specialist in power electronics, control of switched-mode converters, renewable energy integration, and educational hardware.
+  #photo: ""
   social_networks:
     - network: ORCID
       username: "0000-0001-8409-7833"
@@ -12,12 +11,6 @@ cv:
       username: juanpablovillegas
     - network: LinkedIn
       username: juanpablovillegas
-  address:
-    street: Carrera 31 54-10
-    city: Medellín
-    region: Antioquia
-    postalCode: 050034
-    countryCode: CO
   sections:
     Education:
       - institution: Universidad Nacional de Colombia
@@ -25,7 +18,7 @@ cv:
         area: Engineering
         studyType: Ph.D. Candidate
         start_date: 2022-01-01
-        end_date: Present
+        end_date: 2026-12-10
         highlights:
           - Focus on advanced control, energy management systems, and microgrids.
       - institution: Instituto Tecnológico Metropolitano (ITM)
@@ -61,7 +54,7 @@ cv:
         position: Assistant Professor / Docente Ocasional
         location: Medellín, Colombia
         start_date: 2020-01-01
-        end_date: Present
+        end_date: 2026-12-10
         summary: Teaching undergraduate courses in Power Electronics, Industrial Electronics, Continuous and Discrete Control Systems, and Control of Switched Converters.
         highlights:
           - Design of Hardware-in-the-Loop (HIL) systems for educational and research labs.
