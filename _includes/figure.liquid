@@ -1,12 +1,16 @@
 <figure>
   {% if include.path %}
-    <img 
-      src="{{ include.path }}" 
+    <img
+      src="{{ include.path }}"
       alt="{{ include.title | default: 'image' }}"
       class="{{ include.class }}"
-      {% if include.loading %}loading="{{ include.loading }}"{% endif %}
-      {% if include.zoomable %}data-zoomable{% endif %}
-    />
+      {% if include.loading %}
+        loading="{{ include.loading }}"
+      {% endif %}
+      {% if include.zoomable %}
+        data-zoomable
+      {% endif %}
+    >
     {% if include.link %}<a href="{{ include.link }}"></a>{% endif %}
   {% endif %}
   {% if include.title %}
