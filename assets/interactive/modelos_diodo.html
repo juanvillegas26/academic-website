@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelos del Diodo - ITM</title>
+    <!-- Fuentes Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MathJax para ecuaciones (opcional, pero da un toque muy académico) -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            /* Paleta ITM */
+            --itm-blue-dark: #003366;
+            --itm-blue-main: #0056B3;
+            --itm-blue-light: #007BFF;
+            --bg-body: #F0F4F8; /* Gris muy claro azulado */
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --text-main: #212529;
+            --text-light: #6C757D;
+            --accent-on: #FF6B6B;
+            --accent-on-glow: rgba(255, 107, 107, 0.4);
+            --accent-off: #868E96;
+            --border-color: rgba(0, 51, 102, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0,123,255,0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0,51,102,0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Encabezado */
+        header {
+            background: linear-gradient(135deg, var(--itm-blue-dark) 0%, var(--itm-blue-main) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,51,102,0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title h1 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .header-title span {
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .header-credits {
+            text-align: right;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .header-credits strong {
+            font-weight: 600;
+        }
+
+        .logos-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 5px;
+            justify-content: flex-end;
+        }
+
+        .placeholder-logo {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        .placeholder-logo:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Layout Principal */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Paneles Glassmorphism */
+        .glass-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.7);
+        }
+
+        .panel-title {
+            color: var(--itm-blue-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        /* Controles */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .control-value {
+            color: var(--itm-blue-light);
+            font-weight: 600;
+        }
+
+        /* Sliders */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: #D1D9E6;
+            border-radius: 3px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: var(--itm-blue-main);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 2px 5px rgba(0,51,102,0.3);
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--itm-blue-light);
+        }
+
+        /* Selector de Modelo (Radio Tabs) */
+        .model-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .model-tab {
+            position: relative;
+        }
+
+        .model-tab input {
+            display: none;
+        }
+
+        .model-tab label {
+            display: block;
+            padding: 10px 15px;
+            background: rgba(0,51,102,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .model-tab input:checked + label {
+            background: var(--itm-blue-main);
+            color: white;
+            border-color: var(--itm-blue-main);
+            box-shadow: 0 4px 10px rgba(0,86,179,0.3);
+        }
+
+        /* Selector de Material (Pills) */
+        .material-pills {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .material-pill {
+            flex: 1;
+            text-align: center;
+        }
+
+        .material-pill input {
+            display: none;
+        }
+
+        .material-pill label {
+            display: block;
+            padding: 8px 0;
+            background: rgba(0,51,102,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .material-pill input:checked + label {
+            background: var(--itm-blue-light);
+            color: white;
+            border-color: var(--itm-blue-light);
+        }
+
+        /* Toggle Switch */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0,123,255,0.05);
+            border-radius: 8px;
+            border: 1px dashed var(--itm-blue-light);
+        }
+
+        .switch-container span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--itm-blue-dark);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--itm-blue-light);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Área Principal Derecha */
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Tarjetas de Lectura (Readouts) */
+        .readouts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .readout-card {
+            background: var(--bg-panel);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .readout-icon {
+            font-size: 1.8rem;
+            color: var(--itm-blue-light);
+            background: rgba(0,123,255,0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .readout-data h3 {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .readout-data .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Estado ON/OFF Dinámico */
+        .state-card {
+            transition: all 0.3s ease;
+        }
+        .state-on {
+            border-color: var(--accent-on);
+            background: linear-gradient(135deg, rgba(255,107,107,0.05), transparent);
+        }
+        .state-on .readout-icon {
+            color: var(--accent-on);
+            background: rgba(255,107,107,0.15);
+            box-shadow: 0 0 15px var(--accent-on-glow);
+        }
+        .state-on .value { color: var(--accent-on); }
+
+        .state-off {
+            border-color: var(--accent-off);
+        }
+        .state-off .readout-icon {
+            color: var(--accent-off);
+            background: rgba(134,142,150,0.15);
+        }
+
+        /* Contenedores Gráficos */
+        .graphics-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        .animation-wrapper {
+            height: 220px;
+            width: 100%;
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        canvas#doorAnimation {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .formula-display {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,51,102,0.03);
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Badges de Información */
+        .info-badge {
+            display: inline-block;
+            background: var(--itm-blue-light);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <i class="fa-solid fa-microchip fa-2x"></i>
+            <div>
+                <h1>Modelos del Diodo</h1>
+                <span>Electrónica Analógica - Visualizador Interactivo</span>
+            </div>
+        </div>
+        <div class="header-credits">
+            Prof. <strong>Juan Pablo Villegas Ceballos</strong><br>
+            Instituto Tecnológico Metropolitano (ITM)
+            <div class="logos-container">
+                <div class="placeholder-logo" title="Logo ITM">
+                    <i class="fa-solid fa-graduation-cap"></i> ITM
+                </div>
+                <div class="placeholder-logo" title="Canal de YouTube" onclick="window.open('https://youtube.com', '_blank')">
+                    <i class="fa-brands fa-youtube" style="color: #FF0000;"></i> Suscribirse
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <!-- Panel Izquierdo: Controles -->
+        <aside class="glass-panel">
+            <h2 class="panel-title"><i class="fa-solid fa-sliders"></i> Parámetros del Circuito</h2>
+            
+            <div class="control-group">
+                <div class="control-label">Modelo Teórico</div>
+                <div class="model-tabs">
+                    <div class="model-tab">
+                        <input type="radio" id="mod-ideal" name="model" value="ideal">
+                        <label for="mod-ideal">1. Modelo Ideal</label>
+                    </div>
+                    <div class="model-tab">
+                        <input type="radio" id="mod-cv" name="model" value="cv" checked>
+                        <label for="mod-cv">2. Tensión Constante (V<sub style="font-size: 0.6em">γ</sub>)</label>
+                    </div>
+                    <div class="model-tab">
+                        <input type="radio" id="mod-pwl" name="model" value="pwl">
+                        <label for="mod-pwl">3. Lineal por Tramos (V<sub style="font-size: 0.6em">γ</sub> + r<sub>d</sub>)</label>
+                    </div>
+                    <div class="model-tab">
+                        <input type="radio" id="mod-real" name="model" value="real">
+                        <label for="mod-real">4. Exponencial de Shockley</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="switch-container">
+                <span><i class="fa-solid fa-code-compare"></i> Modo Comparación<br><small style="color:var(--text-light); font-weight:400;">Mostrar contra Modelo Real</small></span>
+                <label class="switch">
+                    <input type="checkbox" id="compare-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-group" style="margin-top: 20px;">
+                <div class="control-label">Material Semiconductor</div>
+                <div class="material-pills">
+                    <div class="material-pill">
+                        <input type="radio" id="mat-ge" name="material" value="ge">
+                        <label for="mat-ge">Ge<br><small>0.3V</small></label>
+                    </div>
+                    <div class="material-pill">
+                        <input type="radio" id="mat-si" name="material" value="si" checked>
+                        <label for="mat-si">Si<br><small>0.7V</small></label>
+                    </div>
+                    <div class="material-pill">
+                        <input type="radio" id="mat-gaas" name="material" value="gaas">
+                        <label for="mat-gaas">GaAs<br><small>1.2V</small></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Voltaje Aplicado (V<sub>D</sub>)</span>
+                    <span class="control-value" id="val-vd">0.00 V</span>
+                </div>
+                <input type="range" id="slider-vd" min="-2" max="2" step="0.01" value="0.00">
+            </div>
+
+            <div class="control-group" id="group-rd">
+                <div class="control-label">
+                    <span>Resistencia Dinámica (r<sub>d</sub>) <span class="info-badge">Mod. 3</span></span>
+                    <span class="control-value" id="val-rd">10 Ω</span>
+                </div>
+                <input type="range" id="slider-rd" min="1" max="50" step="1" value="10">
+            </div>
+
+            <div class="control-group" id="group-t">
+                <div class="control-label">
+                    <span>Temperatura (T) <span class="info-badge">Mod. 4</span></span>
+                    <span class="control-value" id="val-t">27 °C</span>
+                </div>
+                <input type="range" id="slider-t" min="0" max="100" step="1" value="27">
+            </div>
+
+            <div class="control-group" id="group-n">
+                <div class="control-label">
+                    <span>Factor de Idealidad (n) <span class="info-badge">Mod. 4</span></span>
+                    <span class="control-value" id="val-n">1.0</span>
+                </div>
+                <input type="range" id="slider-n" min="1.0" max="2.0" step="0.1" value="1.0">
+            </div>
+
+        </aside>
+
+        <!-- Panel Derecho: Visualización -->
+        <main class="dashboard">
+            <!-- Lecturas -->
+            <div class="readouts-grid">
+                <div class="readout-card">
+                    <div class="readout-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="readout-data">
+                        <h3>Voltaje (V<sub>D</sub>)</h3>
+                        <div class="value" id="out-vd">0.00 V</div>
+                    </div>
+                </div>
+                <div class="readout-card">
+                    <div class="readout-icon"><i class="fa-solid fa-wave-square"></i></div>
+                    <div class="readout-data">
+                        <h3>Corriente (I<sub>D</sub>)</h3>
+                        <div class="value" id="out-id">0.00 mA</div>
+                    </div>
+                </div>
+                <div class="readout-card state-card state-off" id="card-state">
+                    <div class="readout-icon" id="icon-state"><i class="fa-solid fa-power-off"></i></div>
+                    <div class="readout-data">
+                        <h3>Estado</h3>
+                        <div class="value" id="out-state" style="font-size: 1.1rem; line-height: 1.4rem; padding-top: 4px;">Bloqueo (OFF)</div>
+                    </div>
+                </div>
+                <div class="readout-card" id="card-vt" style="opacity: 0.5;">
+                    <div class="readout-icon"><i class="fa-solid fa-temperature-half"></i></div>
+                    <div class="readout-data">
+                        <h3>Voltaje Térmico (V<sub>T</sub>)</h3>
+                        <div class="value" id="out-vt">25.86 mV</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="graphics-container">
+                <!-- Gráfica I-V -->
+                <div class="glass-panel">
+                    <h2 class="panel-title">
+                        <i class="fa-solid fa-chart-line"></i> Curva Característica I-V
+                        <span style="margin-left:auto; font-size: 0.85rem; font-weight: normal; color: var(--text-light)">Ecuación activa abajo</span>
+                    </h2>
+                    <div class="chart-wrapper">
+                        <canvas id="ivChart"></canvas>
+                    </div>
+                    <div class="formula-display" id="formula-container">
+                        <!-- LaTeX renderizado aquí -->
+                    </div>
+                </div>
+
+                <!-- Animación Mecánica -->
+                <div class="glass-panel">
+                    <h2 class="panel-title"><i class="fa-solid fa-door-open"></i> Analogía Mecánica (Comportamiento de la Unión PN)</h2>
+                    <div class="animation-wrapper">
+                        <canvas id="doorAnimation"></canvas>
+                    </div>
+                    <p style="text-align: center; font-size: 0.85rem; color: var(--text-light); margin-top: 8px;">
+                        Representación del umbral (V<sub>γ</sub>) como un resorte y la resistencia dinámica (r<sub>d</sub>) como fricción/freno.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- 1. ESTADO GLOBAL ---
+        const state = {
+            model: 'cv', // ideal, cv, pwl, real
+            compare: false,
+            material: 'si',
+            vd: 0.0,
+            rd: 10,
+            tempC: 27,
+            n: 1.0
+        };
+
+        const materials = {
+            ge: { v_gamma: 0.3, is: 9e-8 },      // IS aproximado para Ge (amperios)
+            si: { v_gamma: 0.7, is: 1.6e-14 },   // IS aproximado para Si
+            gaas: { v_gamma: 1.2, is: 6e-23 }    // IS aproximado para GaAs
+        };
+
+        const k = 1.380649e-23; // Constante de Boltzmann
+        const q = 1.60217663e-19; // Carga del electrón
+        
+        let chartInstance = null;
+
+        // --- 2. REFERENCIAS DOM ---
+        const inputs = {
+            models: document.querySelectorAll('input[name="model"]'),
+            compare: document.getElementById('compare-toggle'),
+            materials: document.querySelectorAll('input[name="material"]'),
+            vd: document.getElementById('slider-vd'),
+            rd: document.getElementById('slider-rd'),
+            t: document.getElementById('slider-t'),
+            n: document.getElementById('slider-n')
+        };
+
+        const displays = {
+            valVd: document.getElementById('val-vd'),
+            valRd: document.getElementById('val-rd'),
+            valT: document.getElementById('val-t'),
+            valN: document.getElementById('val-n'),
+            outVd: document.getElementById('out-vd'),
+            outId: document.getElementById('out-id'),
+            outState: document.getElementById('out-state'),
+            outVt: document.getElementById('out-vt'),
+            cardState: document.getElementById('card-state'),
+            iconState: document.getElementById('icon-state'),
+            cardVt: document.getElementById('card-vt'),
+            formula: document.getElementById('formula-container'),
+            groupRd: document.getElementById('group-rd'),
+            groupT: document.getElementById('group-t'),
+            groupN: document.getElementById('group-n')
+        };
+
+        const canvasAnim = document.getElementById('doorAnimation');
+        const ctxAnim = canvasAnim.getContext('2d');
+
+        // --- 3. FUNCIONES MATEMÁTICAS ---
+        function getVt() {
+            const T = state.tempC + 273.15; // Kelvin
+            return (k * T) / q; // En Voltios
+        }
+
+        function getIs() {
+            // El IS depende intrínsecamente del material, y fuertemente de T.
+            // Para fines didácticos simples, ajustaremos IS para que la curva Real 
+            // cruce aprox 10mA en V_gamma a 27C.
+            const Vg = materials[state.material].v_gamma;
+            const Vt_ref = (k * 300.15) / q;
+            // 10mA = IS * exp(Vg / (1.0 * Vt_ref)) => IS = 0.01 / exp(...)
+            return 0.01 / Math.exp(Vg / Vt_ref);
+        }
+
+        function calculateId(vd, model, forceIsReal = false) {
+            const Vg = materials[state.material].v_gamma;
+            const targetModel = forceIsReal ? 'real' : model;
+            let id = 0; // en Amperios
+
+            switch (targetModel) {
+                case 'ideal':
+                    if (vd > 0) id = 999; // Representa Infinito/Corto
+                    else id = 0;
+                    break;
+                case 'cv':
+                    if (vd > Vg) id = 999; 
+                    else id = 0;
+                    break;
+                case 'pwl':
+                    if (vd > Vg) id = (vd - Vg) / state.rd;
+                    else id = 0;
+                    break;
+                case 'real':
+                    const Vt = getVt();
+                    const Is = getIs();
+                    // Para evitar overflow en JS si vd es muy grande
+                    const expTerm = (vd / (state.n * Vt));
+                    if (expTerm > 100) {
+                        id = 999; // Limitar
+                    } else {
+                        id = Is * (Math.exp(expTerm) - 1);
+                    }
+                    break;
+            }
+            return id;
+        }
+
+        // --- 4. ACTUALIZACIÓN DE LA UI ---
+        function updateUI() {
+            // Actualizar labels visuales de sliders
+            displays.valVd.innerText = state.vd.toFixed(2) + ' V';
+            displays.valRd.innerText = state.rd + ' Ω';
+            displays.valT.innerText = state.tempC + ' °C';
+            displays.valN.innerText = state.n.toFixed(1);
+
+            // Resaltar controles activos según modelo
+            displays.groupRd.style.opacity = (state.model === 'pwl') ? '1' : '0.4';
+            displays.groupT.style.opacity = (state.model === 'real' || state.compare) ? '1' : '0.4';
+            displays.groupN.style.opacity = (state.model === 'real' || state.compare) ? '1' : '0.4';
+            displays.cardVt.style.opacity = (state.model === 'real' || state.compare) ? '1' : '0.4';
+
+            // Cálculos principales para el punto actual
+            const Vg = materials[state.material].v_gamma;
+            const Vt_mV = getVt() * 1000;
+            const currentId_A = calculateId(state.vd, state.model);
+            let currentId_mA = currentId_A * 1000;
+
+            // Determinar estado ON/OFF
+            let isOn = false;
+            if (state.model === 'ideal' && state.vd >= 0) isOn = true;
+            else if (state.model === 'cv' && state.vd >= Vg) isOn = true;
+            else if (state.model === 'pwl' && state.vd >= Vg) isOn = true;
+            else if (state.model === 'real' && currentId_mA > 0.001) isOn = true; // threshold 1uA
+
+            // Actualizar Readouts
+            displays.outVd.innerText = state.vd.toFixed(2) + ' V';
+            displays.outVt.innerText = Vt_mV.toFixed(2) + ' mV';
+
+            if (currentId_mA > 10000) {
+                displays.outId.innerHTML = '<span style="color:var(--accent-on); font-size:1.1rem">Cortocircuito</span>';
+                displays.outId.title = "Corriente tiende a infinito";
+            } else {
+                displays.outId.innerText = currentId_mA.toFixed(2) + ' mA';
+                displays.outId.title = "";
+            }
+
+            if (isOn) {
+                displays.cardState.className = 'readout-card state-card state-on';
+                displays.outState.innerText = 'Conducción (ON)';
+                displays.iconState.innerHTML = '<i class="fa-solid fa-power-off"></i>';
+            } else {
+                displays.cardState.className = 'readout-card state-card state-off';
+                displays.outState.innerText = 'Bloqueo (OFF)';
+                displays.iconState.innerHTML = '<i class="fa-solid fa-ban"></i>';
+            }
+
+            // Actualizar Fórmula Matemática
+            updateFormula();
+            
+            // Renderizar Gráfica
+            renderChart();
+        }
+
+        function updateFormula() {
+            let formulaTex = "";
+            const Vg = materials[state.material].v_gamma;
+            switch(state.model) {
+                case 'ideal':
+                    formulaTex = `I_D = \\begin{cases} 0 & \\text{si } V_D < 0 \\\\ \\infty & \\text{si } V_D \\ge 0 \\end{cases}`;
+                    break;
+                case 'cv':
+                    formulaTex = `I_D = \\begin{cases} 0 & \\text{si } V_D < ${Vg}\\text{V} \\\\ \\infty & \\text{si } V_D \\ge ${Vg}\\text{V} \\end{cases}`;
+                    break;
+                case 'pwl':
+                    formulaTex = `I_D = \\begin{cases} 0 & \\text{si } V_D < ${Vg}\\text{V} \\\\ \\frac{V_D - ${Vg}}{${state.rd}\\Omega} & \\text{si } V_D \\ge ${Vg}\\text{V} \\end{cases}`;
+                    break;
+                case 'real':
+                    formulaTex = `I_D = I_S \\left( e^{\\frac{V_D}{n V_T}} - 1 \\right) \\quad \\text{con } V_T = \\frac{kT}{q}`;
+                    break;
+            }
+            displays.formula.innerHTML = `\\[ ${formulaTex} \\]`;
+            // Forzar renderizado de MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise([displays.formula]).catch((err) => console.log(err));
+            }
+        }
+
+        // --- 5. GRÁFICA (CHART.JS) ---
+        function renderChart() {
+            const ctx = document.getElementById('ivChart').getContext('2d');
+            
+            // Generar datos del Eje X (-2 a +2)
+            const ySelected = [];
+            const yCompare = [];
+            
+            // Densidad de puntos
+            for (let v = -2; v <= 2.01; v += 0.02) {
+                let id1 = calculateId(v, state.model) * 1000; // a mA
+                ySelected.push({ x: v, y: id1 > 150 ? 150 : id1 }); // Recortar para no deformar gráfica
+                
+                if (state.compare) {
+                    let id2 = calculateId(v, state.model, true) * 1000;
+                    yCompare.push({ x: v, y: id2 > 150 ? 150 : id2 });
+                }
+            }
+
+            // Datos del punto interactivo
+            const currentId_mA = calculateId(state.vd, state.model) * 1000;
+            const pointData = [{ x: state.vd, y: currentId_mA > 150 ? 150 : currentId_mA }];
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const datasets = [
+                {
+                    label: 'Punto de Operación (VD)',
+                    data: pointData,
+                    backgroundColor: '#FF6B6B',
+                    borderColor: '#FFFFFF',
+                    borderWidth: 2,
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    type: 'scatter',
+                    order: 1,
+                    z: 10
+                },
+                {
+                    label: 'Modelo Seleccionado',
+                    data: ySelected,
+                    borderColor: '#0056B3',
+                    borderWidth: 3,
+                    tension: 0.1,
+                    pointRadius: 0,
+                    order: 2
+                }
+            ];
+
+            if (state.compare) {
+                datasets.push({
+                    label: 'Modelo Real (Shockley)',
+                    data: yCompare,
+                    borderColor: '#868E96', // Gris
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0.4,
+                    pointRadius: 0,
+                    order: 3
+                });
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 }, // Animación 0 para fluidez del slider
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: -2,
+                            max: 2,
+                            title: { display: true, text: 'Voltaje del Diodo VD (V)', font: {weight: 'bold'} },
+                            grid: { color: (ctx) => ctx.tick.value === 0 ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.05)' },
+                            ticks: { maxTicksLimit: 11 }
+                        },
+                        y: {
+                            title: { display: true, text: 'Corriente ID (mA)', font: {weight: 'bold'} },
+                            min: -5,
+                            max: 100, // Limitar visualización
+                            grid: { color: (ctx) => ctx.tick.value === 0 ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.05)' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if(context.datasetIndex === 0) {
+                                        return ` VD: ${context.raw.x.toFixed(2)}V, ID: ${context.raw.y.toFixed(2)}mA`;
+                                    }
+                                    return ` ID: ${context.raw.toFixed(2)} mA`;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 6. ANIMACIÓN MECÁNICA (CANVAS) ---
+        // Partículas (Electrones / Corriente)
+        let particles = [];
+        let animationFrameId;
+
+        function resizeCanvas() {
+            const wrapper = document.querySelector('.animation-wrapper');
+            canvasAnim.width = wrapper.clientWidth;
+            canvasAnim.height = wrapper.clientHeight;
+        }
+
+        function spawnParticle() {
+            particles.push({
+                x: 20, // Empieza a la izquierda
+                y: canvasAnim.height / 2 + (Math.random() * 20 - 10),
+                speed: 0
+            });
+        }
+
+        function drawMechanicalAnimation() {
+            const cw = canvasAnim.width;
+            const ch = canvasAnim.height;
+            const Vg = materials[state.material].v_gamma;
+            
+            ctxAnim.clearRect(0, 0, cw, ch);
+
+            // Calcular apertura de la puerta
+            let angle = 0; // 0 = cerrada, 90 = completamente abierta (pi/2)
+            let current_mA = calculateId(state.vd, state.model) * 1000;
+            
+            if (current_mA > 0) {
+                // Mapear corriente a ángulo (max 75 grados para visualización)
+                let norm = current_mA / 100; 
+                if (norm > 1) norm = 1;
+                angle = norm * (Math.PI / 2.5); 
+            }
+            
+            const doorPivotX = cw / 2;
+            const doorPivotY = ch / 2 - 40;
+            const doorLength = 80;
+
+            // Dibujar Canal / Marco
+            ctxAnim.fillStyle = '#E9ECEF';
+            ctxAnim.fillRect(0, ch/2 - 50, cw, 100);
+            
+            // Borde del canal
+            ctxAnim.beginPath();
+            ctxAnim.moveTo(0, ch/2 - 50); ctxAnim.lineTo(cw, ch/2 - 50);
+            ctxAnim.moveTo(0, ch/2 + 50); ctxAnim.lineTo(cw, ch/2 + 50);
+            ctxAnim.strokeStyle = '#ADB5BD';
+            ctxAnim.lineWidth = 4;
+            ctxAnim.stroke();
+
+            // Dibujar tope (Marco donde cierra la puerta)
+            ctxAnim.fillStyle = '#495057';
+            ctxAnim.fillRect(doorPivotX - 5, ch/2 - 45, 5, 90);
+
+            // Dibujar Puerta
+            ctxAnim.save();
+            ctxAnim.translate(doorPivotX, doorPivotY);
+            // La puerta gira hacia la derecha (valores positivos de ángulo)
+            ctxAnim.rotate(-angle); // Negativo para rotar hacia arriba en el canvas si el eje X es derecha.
+            // Wait, si empuja de izq a der, la puerta debe abrir a la derecha.
+            // Eje de rotacion (0,0) es el pivote arriba. Puerta cuelga hacia abajo (+Y).
+            // Si la empujo a la derecha, debe rotar antihorario? No, horario.
+            // Ángulo positivo = antihorario en canvas normal? En canvas +Y es hacia abajo, 
+            // entonces horario (+angle) movería la parte inferior a la izquierda. 
+            // Para mover a la derecha, ángulo debe ser negativo o rotamos antihorario.
+            ctxAnim.restore();
+
+            ctxAnim.save();
+            ctxAnim.translate(doorPivotX, doorPivotY);
+            ctxAnim.rotate(-angle);
+            
+            // Cuerpo de la puerta
+            ctxAnim.fillStyle = '#0056B3';
+            ctxAnim.fillRect(0, 0, 10, doorLength); // Ancho 10, alto 80
+            
+            // Pivote
+            ctxAnim.beginPath();
+            ctxAnim.arc(5, 5, 8, 0, Math.PI * 2);
+            ctxAnim.fillStyle = '#343A40';
+            ctxAnim.fill();
+            ctxAnim.restore();
+
+            // Resorte (Representa Vg)
+            // Se dibuja en la parte inferior de la puerta
+            const doorTipX = doorPivotX + Math.sin(angle) * doorLength;
+            const doorTipY = doorPivotY + Math.cos(angle) * doorLength;
+            
+            ctxAnim.beginPath();
+            ctxAnim.moveTo(doorTipX, doorTipY);
+            // Dibujar zigzag hasta una pared a la derecha
+            const wallX = cw / 2 + 100;
+            const segments = 10;
+            const stepX = (wallX - doorTipX) / segments;
+            for(let i=1; i<=segments; i++){
+                let yOffset = (i % 2 === 0) ? 10 : -10;
+                if(i===segments) yOffset = 0;
+                ctxAnim.lineTo(doorTipX + i*stepX, doorTipY + yOffset);
+            }
+            ctxAnim.strokeStyle = '#CED4DA'; // Color resorte
+            ctxAnim.lineWidth = 3;
+            ctxAnim.stroke();
+            
+            // Base del resorte
+            ctxAnim.fillStyle = '#495057';
+            ctxAnim.fillRect(wallX, doorTipY - 20, 10, 40);
+            
+            // Texto Vgamma en resorte
+            ctxAnim.fillStyle = '#212529';
+            ctxAnim.font = '12px Inter';
+            ctxAnim.fillText(`Vγ = ${Vg}V`, wallX + 15, doorTipY + 4);
+
+            // Representación de fuerza VD
+            if (state.vd !== 0) {
+                const isForward = state.vd > 0;
+                ctxAnim.beginPath();
+                // Flecha de fuerza
+                let arrowX = doorPivotX - 60;
+                let arrowY = ch/2;
+                if (!isForward) arrowX = doorPivotX + 30; // Inversa empuja de izq a der? No, inversa empuja la puerta contra el marco.
+
+                ctxAnim.moveTo(arrowX, arrowY);
+                if (isForward) {
+                    ctxAnim.lineTo(arrowX + 40, arrowY);
+                    // Punta
+                    ctxAnim.lineTo(arrowX + 30, arrowY - 10);
+                    ctxAnim.moveTo(arrowX + 40, arrowY);
+                    ctxAnim.lineTo(arrowX + 30, arrowY + 10);
+                } else {
+                    ctxAnim.lineTo(arrowX - 40, arrowY); // Empuja hacia la izquierda
+                    ctxAnim.lineTo(arrowX - 30, arrowY - 10);
+                    ctxAnim.moveTo(arrowX - 40, arrowY);
+                    ctxAnim.lineTo(arrowX - 30, arrowY + 10);
+                }
+                ctxAnim.strokeStyle = isForward ? '#007BFF' : '#FF6B6B';
+                ctxAnim.lineWidth = 4;
+                ctxAnim.stroke();
+                
+                ctxAnim.fillStyle = isForward ? '#007BFF' : '#FF6B6B';
+                ctxAnim.fillText(`VD = ${state.vd.toFixed(2)}V`, arrowX - (isForward ? 10 : -20), arrowY - 15);
+            }
+
+            // Amortiguador (Representa rd) - Solo visible en PWL
+            if (state.model === 'pwl') {
+                ctxAnim.fillStyle = '#FF922B'; // Naranja
+                ctxAnim.fillRect(wallX - 30, doorTipY + 20, 40, 15); // Cilindro
+                ctxAnim.beginPath();
+                ctxAnim.moveTo(doorTipX, doorTipY + 20);
+                ctxAnim.lineTo(wallX - 30, doorTipY + 27); // Piston
+                ctxAnim.strokeStyle = '#666';
+                ctxAnim.stroke();
+                ctxAnim.fillStyle = '#212529';
+                ctxAnim.fillText(`rd = ${state.rd}Ω (Freno)`, wallX - 25, doorTipY + 48);
+            }
+
+            // Animar Corriente (Partículas)
+            if (current_mA > 0 && angle > 0.05) { // Si hay corriente y puerta levemente abierta
+                // Determinar cuántas partículas generar según corriente
+                let spawnRate = Math.floor(current_mA / 5);
+                if (spawnRate > 10) spawnRate = 10;
+                if (Math.random() < spawnRate * 0.1) spawnParticle();
+
+                // Actualizar y dibujar
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+                    p.speed = 2 + (current_mA / 20); // Velocidad proporcional a ID
+                    p.x += p.speed;
+
+                    // Dibujar
+                    ctxAnim.beginPath();
+                    ctxAnim.arc(p.x, p.y, 4, 0, Math.PI*2);
+                    ctxAnim.fillStyle = 'rgba(255, 107, 107, 0.8)';
+                    ctxAnim.fill();
+
+                    // Remover si sale del canvas
+                    if (p.x > cw) {
+                        particles.splice(i, 1);
+                    }
+                }
+            } else {
+                particles = []; // Limpiar si no hay corriente
+            }
+
+            animationFrameId = requestAnimationFrame(drawMechanicalAnimation);
+        }
+
+        // --- 7. EVENT LISTENERS ---
+        inputs.models.forEach(el => el.addEventListener('change', (e) => {
+            state.model = e.target.value;
+            updateUI();
+        }));
+
+        inputs.compare.addEventListener('change', (e) => {
+            state.compare = e.target.checked;
+            updateUI();
+        });
+
+        inputs.materials.forEach(el => el.addEventListener('change', (e) => {
+            state.material = e.target.value;
+            updateUI();
+        }));
+
+        // Para evitar lag en el chart durante el drag continuo del slider, 
+        // usamos 'input' para UI texto, y debounce o requestAnimationFrame para chart,
+        // pero Chart.js con animaciones 0 es bastante rápido.
+        inputs.vd.addEventListener('input', (e) => {
+            state.vd = parseFloat(e.target.value);
+            updateUI();
+        });
+        
+        inputs.rd.addEventListener('input', (e) => {
+            state.rd = parseInt(e.target.value);
+            updateUI();
+        });
+
+        inputs.t.addEventListener('input', (e) => {
+            state.tempC = parseInt(e.target.value);
+            updateUI();
+        });
+
+        inputs.n.addEventListener('input', (e) => {
+            state.n = parseFloat(e.target.value);
+            updateUI();
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        // --- INICIALIZACIÓN ---
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            updateUI();
+            drawMechanicalAnimation();
+        });
+
+    </script>
+</body>
+</html>
