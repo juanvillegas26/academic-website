@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recta de Carga y Punto Q - ITM</title>
+    <!-- Fuentes Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js y Plugins de Zoom -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <!-- MathJax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            /* Paleta ITM */
+            --itm-blue-dark: #003366;
+            --itm-blue-main: #0056B3;
+            --itm-blue-light: #007BFF;
+            --bg-body: #F0F4F8;
+            --bg-panel: rgba(255, 255, 255, 0.9);
+            --text-main: #212529;
+            --text-light: #6C757D;
+            --accent-q: #FF4757;
+            --border-color: rgba(0, 51, 102, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0,123,255,0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0,51,102,0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Encabezado */
+        header {
+            background: linear-gradient(135deg, var(--itm-blue-dark) 0%, var(--itm-blue-main) 100%);
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,51,102,0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title h1 {
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+        }
+
+        .header-title span {
+            font-weight: 300;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .header-credits {
+            text-align: right;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .logos-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 5px;
+            justify-content: flex-end;
+        }
+
+        .placeholder-logo {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        .placeholder-logo:hover { background: rgba(255,255,255,0.3); }
+
+        /* Layout Principal */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        @media (max-width: 1100px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Paneles */
+        .glass-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+        }
+
+        .panel-title {
+            color: var(--itm-blue-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        /* Controles */
+        .control-group { margin-bottom: 20px; }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        
+        .control-value { color: var(--itm-blue-main); }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: #D1D9E6;
+            border-radius: 3px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: var(--itm-blue-main);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Pills & Tabs */
+        .pill-group {
+            display: flex;
+            gap: 5px;
+            background: rgba(0,51,102,0.04);
+            padding: 4px;
+            border-radius: 8px;
+        }
+        .pill { flex: 1; position: relative; }
+        .pill input { display: none; }
+        .pill label {
+            display: block;
+            text-align: center;
+            padding: 6px 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        .pill input:checked + label {
+            background: var(--itm-blue-main);
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,86,179,0.3);
+        }
+
+        /* Canvas Circuito */
+        .circuit-container {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        canvas#circuitCanvas {
+            width: 100%;
+            height: 200px;
+        }
+
+        /* Área Principal Derecha */
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Pasos Matemáticos */
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .step-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            border-top: 4px solid var(--itm-blue-light);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .step-card.q-point {
+            border-top-color: var(--accent-q);
+            background: rgba(255,71,87,0.03);
+        }
+
+        .step-num {
+            position: absolute;
+            top: -12px;
+            right: 15px;
+            background: var(--itm-blue-light);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .step-card.q-point .step-num { background: var(--accent-q); }
+
+        .step-card h3 {
+            font-size: 0.85rem;
+            color: var(--itm-blue-dark);
+            margin-bottom: 8px;
+        }
+        .step-card.q-point h3 { color: var(--accent-q); }
+
+        .math-expr {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .math-result {
+            font-weight: 700;
+            color: var(--itm-blue-main);
+            font-size: 1.1rem;
+        }
+        .step-card.q-point .math-result { color: var(--accent-q); font-size: 1.25rem;}
+
+        /* Gráfica */
+        .chart-wrapper {
+            position: relative;
+            height: 450px;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--itm-blue-light);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <i class="fa-solid fa-chart-line fa-2x"></i>
+            <div>
+                <h1>Recta de Carga y Punto Q</h1>
+                <span>Análisis de Circuitos con Diodos</span>
+            </div>
+        </div>
+        <div class="header-credits">
+            Prof. <strong>Juan Pablo Villegas Ceballos</strong><br>
+            Instituto Tecnológico Metropolitano (ITM)
+            <div class="logos-container">
+                <div class="placeholder-logo" title="Logo ITM">
+                    <i class="fa-solid fa-graduation-cap"></i> ITM
+                </div>
+                <div class="placeholder-logo" title="Canal de YouTube">
+                    <i class="fa-brands fa-youtube" style="color: #FF0000;"></i> Suscribirse
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-grid">
+        <!-- Controles -->
+        <aside class="glass-panel">
+            <h2 class="panel-title"><i class="fa-solid fa-sliders"></i> Parámetros de la Malla</h2>
+            
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Fuente DC (E)</span>
+                    <span class="control-value" id="val-E">10.0 V</span>
+                </div>
+                <input type="range" id="slider-E" min="1" max="20" step="0.1" value="10.0">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Resistencia (R)</span>
+                    <span class="control-value" id="val-R">500 Ω</span>
+                </div>
+                <input type="range" id="slider-R" min="100" max="2000" step="10" value="500">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label" style="margin-bottom: 4px;">Modelo del Diodo</div>
+                <div class="pill-group" style="margin-bottom: 10px;">
+                    <div class="pill">
+                        <input type="radio" id="mod-ideal" name="model" value="ideal">
+                        <label for="mod-ideal">Ideal</label>
+                    </div>
+                    <div class="pill">
+                        <input type="radio" id="mod-aprox" name="model" value="aprox">
+                        <label for="mod-aprox">Aproximado</label>
+                    </div>
+                    <div class="pill">
+                        <input type="radio" id="mod-real" name="model" value="real" checked>
+                        <label for="mod-real">Real (Shockley)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group" id="material-group">
+                <div class="control-label" style="margin-bottom: 4px;">Material (V<sub style="font-size:0.7em">γ</sub>)</div>
+                <div class="pill-group">
+                    <div class="pill">
+                        <input type="radio" id="mat-ge" name="material" value="ge">
+                        <label for="mat-ge">Ge (0.3V)</label>
+                    </div>
+                    <div class="pill">
+                        <input type="radio" id="mat-si" name="material" value="si" checked>
+                        <label for="mat-si">Si (0.7V)</label>
+                    </div>
+                    <div class="pill">
+                        <input type="radio" id="mat-gaas" name="material" value="gaas">
+                        <label for="mat-gaas">GaAs (1.2V)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="circuit-container">
+                <h3 style="font-size: 0.9rem; color: var(--itm-blue-dark); margin-bottom: 5px;">Esquema del Circuito</h3>
+                <canvas id="circuitCanvas" width="280" height="180"></canvas>
+            </div>
+        </aside>
+
+        <!-- Área Principal -->
+        <main class="dashboard">
+            
+            <!-- Pasos Matemáticos -->
+            <div class="steps-container">
+                <div class="step-card">
+                    <div class="step-num">Paso 1</div>
+                    <h3>Ecuación LVK de Malla</h3>
+                    <div class="math-expr" id="eq-lvk">E = V<sub>D</sub> + I<sub>D</sub>·R</div>
+                    <div class="math-result" style="font-size:0.9rem; color:var(--text-light)" id="eq-loadline">I<sub>D</sub> = (E / R) - (V<sub>D</sub> / R)</div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-num">Paso 2</div>
+                    <h3>Corte Eje de Voltaje (X)</h3>
+                    <div class="math-expr">Si I<sub>D</sub> = 0mA</div>
+                    <div class="math-result">V<sub>D,máx</sub> = <span id="out-vdmax">10.0</span> V</div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-num">Paso 3</div>
+                    <h3>Corte Eje de Corriente (Y)</h3>
+                    <div class="math-expr">Si V<sub>D</sub> = 0V</div>
+                    <div class="math-result">I<sub>D,máx</sub> = <span id="out-idmax">20.0</span> mA</div>
+                </div>
+
+                <div class="step-card q-point">
+                    <div class="step-num">Paso 5</div>
+                    <h3>Punto de Operación Q</h3>
+                    <div class="math-expr">Intersección Exacta:</div>
+                    <div class="math-result" id="out-qpoint">Q = (0.7V, 18.6mA)</div>
+                    <div style="font-size:0.8rem; margin-top:5px; color:var(--text-main);">V<sub>R</sub> = <span id="out-vr">9.3</span> V</div>
+                </div>
+            </div>
+
+            <!-- Gráfica -->
+            <div class="glass-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">
+                    <h2 class="panel-title" style="border-bottom:none; padding-bottom:0; margin-bottom:0;">
+                        <i class="fa-solid fa-chart-area"></i> Análisis Gráfico: Curva Característica vs Recta de Carga
+                    </h2>
+                    <button onclick="if(chartInstance) chartInstance.resetZoom()" style="background:var(--itm-blue-light); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="fa-solid fa-expand"></i> Restaurar Vista</button>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="mainChart"></canvas>
+                </div>
+                <div style="display:flex; justify-content:center; gap:20px; margin-top:10px; font-size:0.85rem;">
+                    <div><span style="display:inline-block; width:12px; height:12px; background:#0056B3; border-radius:50%; margin-right:4px;"></span> Curva del Diodo</div>
+                    <div><span style="display:inline-block; width:12px; height:12px; background:#212529; margin-right:4px;"></span> Recta de Carga</div>
+                    <div><span style="display:inline-block; width:12px; height:12px; background:#FF4757; border-radius:50%; margin-right:4px;"></span> Punto Q</div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- 1. ESTADO ---
+        const state = {
+            E: 10.0,
+            R: 500,
+            model: 'real',
+            material: 'si',
+            n: 1.0,
+            tempK: 300.15
+        };
+
+        const materials = {
+            ge: { Vg: 0.3, Is: 1e-6 },     // 1uA
+            si: { Vg: 0.7, Is: 10e-12 },   // 10pA
+            gaas: { Vg: 1.2, Is: 5e-12 }   // 5pA
+        };
+
+        const k = 1.380649e-23;
+        const q = 1.60217663e-19;
+        const Vt = (k * state.tempK) / q;
+
+        let chartInstance = null;
+
+        // --- 2. ELEMENTOS DOM ---
+        const ui = {
+            sliderE: document.getElementById('slider-E'),
+            sliderR: document.getElementById('slider-R'),
+            valE: document.getElementById('val-E'),
+            valR: document.getElementById('val-R'),
+            models: document.querySelectorAll('input[name="model"]'),
+            materials: document.querySelectorAll('input[name="material"]'),
+            matGroup: document.getElementById('material-group'),
+            
+            outVdmax: document.getElementById('out-vdmax'),
+            outIdmax: document.getElementById('out-idmax'),
+            outQpoint: document.getElementById('out-qpoint'),
+            outVr: document.getElementById('out-vr'),
+            eqLvk: document.getElementById('eq-lvk'),
+            eqLoadline: document.getElementById('eq-loadline')
+        };
+
+        const canvasCirc = document.getElementById('circuitCanvas');
+        const ctxCirc = canvasCirc.getContext('2d');
+
+        // --- 3. LÓGICA MATEMÁTICA ---
+        // Retorna la corriente del diodo (Amperios) para un voltaje Vd según el modelo actual
+        function getDiodeCurrent(Vd) {
+            if (state.model === 'ideal') {
+                if (Vd > 0) return 999;
+                return 0;
+            } else if (state.model === 'aprox') {
+                const Vg = materials[state.material].Vg;
+                if (Vd > Vg) return 999;
+                return 0;
+            } else {
+                // Modelo Real (Shockley)
+                const Is = materials[state.material].Is;
+                const expTerm = Vd / (state.n * Vt);
+                if (expTerm > 100) return 999;
+                return Is * (Math.exp(expTerm) - 1);
+            }
+        }
+
+        // Resuelve numéricamente la intersección (Punto Q)
+        function findQPoint() {
+            const E = state.E;
+            const R = state.R;
+
+            if (state.model === 'ideal') {
+                return { Vd: 0, Id: E / R };
+            } 
+            else if (state.model === 'aprox') {
+                const Vg = materials[state.material].Vg;
+                if (E > Vg) return { Vd: Vg, Id: (E - Vg) / R };
+                return { Vd: E, Id: 0 };
+            } 
+            else {
+                // Modelo Real: Búsqueda Binaria en Vd en el intervalo [0, E]
+                const Is = materials[state.material].Is;
+                let low = 0;
+                let high = E;
+                let Vd_q = 0;
+
+                for (let i = 0; i < 60; i++) {
+                    Vd_q = (low + high) / 2;
+                    let Id_diode = Is * (Math.exp(Vd_q / (state.n * Vt)) - 1);
+                    let Id_load = (E - Vd_q) / R;
+                    
+                    if (Id_diode > Id_load) {
+                        high = Vd_q;
+                    } else {
+                        low = Vd_q;
+                    }
+                }
+                
+                let Id_q = (E - Vd_q) / R; // Usar la recta de carga para evitar overflow de exponenciales grandes
+                if (Id_q < 0) Id_q = 0;
+                return { Vd: Vd_q, Id: Id_q };
+            }
+        }
+
+        // --- 4. DIBUJAR CIRCUITO ---
+        function drawCircuit(Vd_q, Vr_q) {
+            const cw = canvasCirc.width;
+            const ch = canvasCirc.height;
+            ctxCirc.clearRect(0, 0, cw, ch);
+
+            ctxCirc.lineWidth = 2;
+            ctxCirc.strokeStyle = '#212529';
+            ctxCirc.lineJoin = 'round';
+
+            // Coordenadas
+            const xLeft = 50, xRight = 230;
+            const yTop = 40, yBottom = 140;
+
+            // Cables principales
+            ctxCirc.beginPath();
+            // Arriba
+            ctxCirc.moveTo(xLeft, yTop); ctxCirc.lineTo(xRight, yTop);
+            // Abajo
+            ctxCirc.moveTo(xLeft, yBottom); ctxCirc.lineTo(xRight, yBottom);
+            // Derecha (Resistencia)
+            ctxCirc.moveTo(xRight, yTop); ctxCirc.lineTo(xRight, yTop + 20);
+            ctxCirc.moveTo(xRight, yBottom); ctxCirc.lineTo(xRight, yBottom - 20);
+            // Izquierda (Fuente DC)
+            ctxCirc.moveTo(xLeft, yTop); ctxCirc.lineTo(xLeft, yTop + 40);
+            ctxCirc.moveTo(xLeft, yBottom); ctxCirc.lineTo(xLeft, yBottom - 40);
+            ctxCirc.stroke();
+
+            // Fuente DC
+            ctxCirc.beginPath();
+            ctxCirc.moveTo(xLeft - 15, yTop + 40); ctxCirc.lineTo(xLeft + 15, yTop + 40);
+            ctxCirc.moveTo(xLeft - 8, yBottom - 40); ctxCirc.lineTo(xLeft + 8, yBottom - 40);
+            ctxCirc.stroke();
+            // Polaridad Fuente
+            ctxCirc.font = "12px Inter"; ctxCirc.fillStyle = "#212529";
+            ctxCirc.fillText("+", xLeft - 25, yTop + 45);
+            ctxCirc.fillText("-", xLeft - 20, yBottom - 35);
+            ctxCirc.fillStyle = "#0056B3"; ctxCirc.font = "bold 14px Inter";
+            ctxCirc.fillText(`${state.E.toFixed(1)}V`, xLeft - 40, yTop + 55);
+
+            // Diodo (Top medio)
+            const cx = (xLeft + xRight) / 2;
+            ctxCirc.fillStyle = "#fff";
+            ctxCirc.fillRect(cx - 15, yTop - 15, 30, 30);
+            
+            ctxCirc.beginPath();
+            ctxCirc.moveTo(cx - 10, yTop - 10);
+            ctxCirc.lineTo(cx - 10, yTop + 10);
+            ctxCirc.lineTo(cx + 10, yTop);
+            ctxCirc.closePath();
+            ctxCirc.fillStyle = "#0056B3";
+            ctxCirc.fill();
+            ctxCirc.beginPath();
+            ctxCirc.moveTo(cx + 10, yTop - 10);
+            ctxCirc.lineTo(cx + 10, yTop + 10);
+            ctxCirc.stroke();
+            
+            // Texto Diodo
+            ctxCirc.fillStyle = "#FF4757"; ctxCirc.font = "bold 12px Inter";
+            ctxCirc.fillText(`+ VD = ${Vd_q.toFixed(2)}V -`, cx - 35, yTop - 15);
+
+            // Resistencia (Derecha)
+            ctxCirc.beginPath();
+            let ry = yTop + 20;
+            const rStep = 60 / 6;
+            ctxCirc.moveTo(xRight, ry);
+            for(let i=1; i<=6; i++) {
+                let rx = xRight + (i%2===0 ? -8 : 8);
+                if(i===6) rx = xRight;
+                ry += rStep;
+                ctxCirc.lineTo(rx, ry);
+            }
+            ctxCirc.stroke();
+            
+            // Texto Resistencia
+            ctxCirc.fillStyle = "#FF4757";
+            ctxCirc.fillText(`+ VR = ${Vr_q.toFixed(2)}V -`, xRight + 12, (yTop+yBottom)/2 + 4);
+            ctxCirc.fillStyle = "#0056B3";
+            ctxCirc.fillText(`R = ${state.R}Ω`, xRight + 15, (yTop+yBottom)/2 - 10);
+
+            // Flecha Corriente I_D
+            ctxCirc.beginPath();
+            ctxCirc.moveTo(xLeft + 30, yTop - 15);
+            ctxCirc.lineTo(xLeft + 60, yTop - 15);
+            ctxCirc.lineTo(xLeft + 55, yTop - 20);
+            ctxCirc.moveTo(xLeft + 60, yTop - 15);
+            ctxCirc.lineTo(xLeft + 55, yTop - 10);
+            ctxCirc.strokeStyle = "#FF4757";
+            ctxCirc.stroke();
+            ctxCirc.fillText(`ID`, xLeft + 40, yTop - 22);
+        }
+
+        // --- 5. ACTUALIZAR UI Y GRÁFICA ---
+        function updateApp() {
+            // Actualizar textos controles
+            ui.valE.innerText = state.E.toFixed(1) + ' V';
+            ui.valR.innerText = state.R + ' Ω';
+            
+            ui.matGroup.style.opacity = (state.model === 'ideal') ? '0.4' : '1';
+            ui.matGroup.style.pointerEvents = (state.model === 'ideal') ? 'none' : 'auto';
+
+            // Cálculos
+            const Id_max_A = state.E / state.R;
+            const Id_max_mA = Id_max_A * 1000;
+            const Vd_max = state.E;
+
+            const Q = findQPoint();
+            const Q_mA = Q.Id * 1000;
+            const Vr = Q.Id * state.R;
+
+            // Actualizar Textos
+            ui.eqLvk.innerHTML = `${state.E.toFixed(1)}V = V<sub>D</sub> + I<sub>D</sub>·${state.R}Ω`;
+            ui.eqLoadline.innerHTML = `I<sub>D</sub> = ${Id_max_mA.toFixed(1)}mA - V<sub>D</sub>/${state.R}Ω`;
+            
+            ui.outVdmax.innerText = Vd_max.toFixed(2);
+            ui.outIdmax.innerText = Id_max_mA.toFixed(2);
+            ui.outQpoint.innerText = `Q = (${Q.Vd.toFixed(2)} V, ${Q_mA.toFixed(2)} mA)`;
+            ui.outVr.innerText = Vr.toFixed(2);
+
+            drawCircuit(Q.Vd, Vr);
+            renderChart(Vd_max, Id_max_mA, Q, Q_mA);
+        }
+
+        function renderChart(Vd_max, Id_max_mA, Q, Q_mA) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            // Dataset: Curva Diodo
+            const dataDiode = [];
+            // Limitar curva de diodo visualmente a un voltaje ligeramente superior al Vg para que se vea el codo
+            let maxVd_plot = Math.min(state.E, 2.0); 
+            if (state.model === 'ideal') maxVd_plot = 0.5;
+            
+            // Generar curva
+            for (let v = 0; v <= Math.max(state.E + 0.5, 1.5); v += 0.01) {
+                let id_A = getDiodeCurrent(v);
+                let id_mA = id_A * 1000;
+                if (id_mA <= Id_max_mA * 1.5) { // No dibujar hasta infinito
+                    dataDiode.push({ x: v, y: id_mA });
+                }
+            }
+            // Asegurar que haya línea recta vertical para modelos ideales/aprox si es necesario
+            if (state.model === 'ideal') {
+                dataDiode.push({ x: 0, y: Id_max_mA * 1.5 });
+            } else if (state.model === 'aprox') {
+                const Vg = materials[state.material].Vg;
+                dataDiode.push({ x: Vg, y: Id_max_mA * 1.5 });
+            }
+
+            // Dataset: Recta de Carga
+            const dataLoadLine = [
+                { x: 0, y: Id_max_mA },
+                { x: Vd_max, y: 0 }
+            ];
+
+            // Dataset: Punto Q y Proyecciones
+            const dataQ = [{ x: Q.Vd, y: Q_mA }];
+            const dataProjY = [{ x: 0, y: Q_mA }, { x: Q.Vd, y: Q_mA }];
+            const dataProjX = [{ x: Q.Vd, y: 0 }, { x: Q.Vd, y: Q_mA }];
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Punto de Operación Q',
+                            data: dataQ,
+                            backgroundColor: '#FF4757',
+                            borderColor: '#FFFFFF',
+                            borderWidth: 2,
+                            pointRadius: 7,
+                            pointHoverRadius: 9,
+                            type: 'scatter',
+                            order: 1,
+                            z: 20
+                        },
+                        {
+                            label: 'Cortes Ejes',
+                            data: dataLoadLine,
+                            backgroundColor: '#212529',
+                            borderColor: '#FFFFFF',
+                            borderWidth: 2,
+                            pointRadius: 5,
+                            type: 'scatter',
+                            order: 2,
+                            z: 15
+                        },
+                        {
+                            label: 'Recta de Carga',
+                            data: dataLoadLine,
+                            borderColor: '#212529',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            order: 3
+                        },
+                        {
+                            label: 'Curva Característica',
+                            data: dataDiode,
+                            borderColor: '#0056B3',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            order: 4
+                        },
+                        {
+                            label: 'Proyección Y',
+                            data: dataProjY,
+                            borderColor: '#FF4757',
+                            borderWidth: 1.5,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            order: 5
+                        },
+                        {
+                            label: 'Proyección X',
+                            data: dataProjX,
+                            borderColor: '#FF4757',
+                            borderWidth: 1.5,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            order: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 0,
+                            max: Math.max(state.E + 1, 2),
+                            title: { display: true, text: 'Voltaje VD (V)', font: {weight: 'bold'} },
+                            grid: { color: (ctx) => ctx.tick.value === 0 ? '#000' : 'rgba(0,0,0,0.05)' },
+                            ticks: { maxTicksLimit: 20 }
+                        },
+                        y: {
+                            type: 'linear',
+                            min: 0,
+                            max: Id_max_mA + (Id_max_mA * 0.2),
+                            title: { display: true, text: 'Corriente ID (mA)', font: {weight: 'bold'} },
+                            grid: { color: (ctx) => ctx.tick.value === 0 ? '#000' : 'rgba(0,0,0,0.05)' },
+                            ticks: { maxTicksLimit: 20 }
+                        }
+                    },
+                    plugins: {
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'xy'
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy'
+                            }
+                        },
+                        legend: { display: false }, // Ocultamos la leyenda para usar la personalizada en HTML
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` VD: ${context.raw.x.toFixed(2)}V, ID: ${context.raw.y.toFixed(2)}mA`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 6. EVENTOS ---
+        ui.sliderE.addEventListener('input', (e) => { state.E = parseFloat(e.target.value); updateApp(); });
+        ui.sliderR.addEventListener('input', (e) => { state.R = parseInt(e.target.value); updateApp(); });
+        
+        ui.models.forEach(el => el.addEventListener('change', (e) => { state.model = e.target.value; updateApp(); }));
+        ui.materials.forEach(el => el.addEventListener('change', (e) => { state.material = e.target.value; updateApp(); }));
+
+        // Init
+        window.addEventListener('load', updateApp);
+
+    </script>
+</body>
+</html>
