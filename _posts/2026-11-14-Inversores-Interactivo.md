@@ -28,4 +28,4 @@ Mueve los controles deslizantes a continuación para observar el comportamiento 
 ### ¿Cómo usar esta herramienta?
 
 1. **Explora las pestañas:** Observa los diferentes circuitos para generar una onda AC a partir de una fuente DC.
-2. **Analizá los tipos de modulación:**.
+2. **Analizá los tipos de modulación:** MOdifica los parametros.
