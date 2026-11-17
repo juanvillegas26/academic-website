@@ -1,0 +1,3611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inversores CC/CA: Topologías, Filtrado LC y Modulación SPWM | ITM</title>
+  <style>
+    :root {
+      --itm-navy: #003366;
+      --itm-blue: #0056B3;
+      --itm-accent: #007BFF;
+      --itm-cyan: #00E5FF;
+      --carrier-orange: #FD7E14;
+      --pwm-green: #198754;
+      --pwm-dark: #2B3035;
+      --bg-pure: #FFFFFF;
+      --bg-light: #F8F9FA;
+      --bg-card: #FFFFFF;
+      --border-color: #DEE2E6;
+      --text-main: #212529;
+      --text-muted: #495057;
+      --quad-inv: #E7F1FF;
+      --quad-rec: #FFF3CD;
+      --shadow-sm: 0 2px 8px rgba(0, 51, 102, 0.07);
+      --shadow-md: 0 4px 16px rgba(0, 51, 102, 0.10);
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-pure);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ENCABEZADO INSTITUCIONAL */
+    header {
+      background: linear-gradient(135deg, var(--itm-navy) 0%, var(--itm-blue) 100%);
+      color: #FFFFFF;
+      padding: 1.25rem 2rem;
+      border-bottom: 4px solid var(--carrier-orange);
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-slot {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px dashed rgba(255, 255, 255, 0.45);
+      border-radius: 8px;
+      padding: 0.55rem 1rem;
+      min-width: 175px;
+      justify-content: center;
+      color: #FFFFFF;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .brand-slot:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .brand-slot svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .header-titles {
+      flex: 1;
+      text-align: center;
+      min-width: 280px;
+    }
+
+    .header-titles h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.25rem;
+    }
+
+    .header-titles p {
+      font-size: 0.95rem;
+      color: #E2ECF5;
+      font-weight: 500;
+    }
+
+    /* NAVEGACIÓN POR PESTAÑAS */
+    .tabs-bar {
+      background-color: var(--bg-light);
+      border-bottom: 2px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .tabs-nav {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 2rem 0;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      appearance: none;
+      border: 1px solid transparent;
+      border-bottom: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.75rem 1.35rem;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--itm-navy);
+      background-color: rgba(0, 86, 179, 0.06);
+    }
+
+    .tab-btn.active {
+      background-color: var(--itm-navy);
+      color: #FFFFFF;
+      border-color: var(--itm-navy);
+      box-shadow: 0 -2px 8px rgba(0, 51, 102, 0.12);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    main {
+      flex: 1;
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+      padding: clamp(0.85rem, 2vw, 1.75rem) clamp(0.75rem, 2.5vw, 2rem);
+      overflow-x: hidden;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.25s ease;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* TARJETAS Y CONTENEDORES */
+    .dashboard-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background-color: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-top: 4px solid var(--itm-navy);
+      border-radius: var(--radius);
+      padding: clamp(0.9rem, 1.8vw, 1.4rem);
+      box-shadow: var(--shadow-sm);
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--border-color);
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--itm-navy);
+    }
+
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* =======================================================
+       ESTILOS PESTAÑA 1: TOPOLOGÍAS BASE, SVG Y OSCILOSCOPIO
+       ======================================================= */
+    .topo-selector-layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .topo-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
+    .topo-nav-btn {
+      appearance: none;
+      width: 100%;
+      text-align: left;
+      background: var(--bg-pure);
+      border: 1.5px solid var(--border-color);
+      border-left: 5px solid var(--itm-blue);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .topo-nav-btn:hover {
+      border-color: var(--itm-blue);
+      background-color: #F1F7FF;
+      transform: translateX(2px);
+    }
+
+    .topo-nav-btn.active {
+      background: linear-gradient(135deg, var(--itm-navy) 0%, var(--itm-blue) 100%);
+      color: #FFFFFF;
+      border-color: var(--itm-navy);
+      box-shadow: var(--shadow-md);
+    }
+
+    .topo-nav-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--itm-navy);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topo-nav-btn.active .topo-nav-title {
+      color: #FFFFFF;
+    }
+
+    .topo-nav-tag {
+      font-size: 0.72rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      background: #E7F1FF;
+      color: var(--itm-navy);
+      font-weight: 700;
+    }
+
+    .topo-nav-btn.active .topo-nav-tag {
+      background: rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+    }
+
+    .topo-nav-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .topo-nav-btn.active .topo-nav-desc {
+      color: #E2ECF5;
+    }
+
+    .topo-view-panel {
+      display: none;
+      animation: fadeIn 0.22s ease;
+      min-width: 0;
+    }
+
+    .topo-view-panel.active {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: stretch;
+    }
+
+    .svg-schematic-box {
+      background: var(--bg-pure);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .schematic-svg {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 340px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .svg-wire {
+      stroke: var(--itm-blue);
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .svg-wire-Load {
+      stroke: var(--carrier-orange);
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .svg-comp {
+      stroke: var(--text-main);
+      stroke-width: 2.4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .svg-comp-fill {
+      fill: var(--text-main);
+      stroke: var(--text-main);
+      stroke-width: 1.5;
+    }
+
+    .svg-node {
+      fill: var(--itm-navy);
+      stroke: #FFFFFF;
+      stroke-width: 1.5;
+    }
+
+    .svg-load-box {
+      fill: #FFF4E6;
+      stroke: var(--carrier-orange);
+      stroke-width: 2.2;
+      transition: all 0.25s ease;
+    }
+
+    .svg-switch-box {
+      fill: #F8F9FA;
+      stroke: #ADB5BD;
+      stroke-width: 1.8;
+      stroke-dasharray: 4 3;
+      transition: all 0.25s ease;
+    }
+
+    .sw-contact {
+      stroke: #ADB5BD;
+      stroke-width: 2.5;
+      stroke-dasharray: 4 3;
+      fill: none;
+      transition: all 0.25s ease;
+    }
+
+    .sw-group.sw-closed-pos .svg-switch-box {
+      fill: rgba(0, 123, 255, 0.14);
+      stroke: #007BFF;
+      stroke-width: 2.6;
+      stroke-dasharray: none;
+      filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.55));
+    }
+
+    .sw-group.sw-closed-pos .sw-contact {
+      stroke: #007BFF;
+      stroke-width: 3.4;
+      stroke-dasharray: none;
+    }
+
+    .sw-group.sw-closed-neg .svg-switch-box {
+      fill: rgba(253, 126, 20, 0.15);
+      stroke: #FD7E14;
+      stroke-width: 2.6;
+      stroke-dasharray: none;
+      filter: drop-shadow(0 0 6px rgba(253, 126, 20, 0.5));
+    }
+
+    .sw-group.sw-closed-neg .sw-contact {
+      stroke: #FD7E14;
+      stroke-width: 3.4;
+      stroke-dasharray: none;
+    }
+
+    .sw-group.sw-open .svg-switch-box {
+      fill: #F1F3F5;
+      stroke: #ADB5BD;
+      stroke-width: 1.5;
+      stroke-dasharray: 4 4;
+      opacity: 0.65;
+    }
+
+    .sw-group.sw-open .sw-contact {
+      stroke: #ADB5BD;
+      stroke-width: 2;
+      stroke-dasharray: 4 4;
+    }
+
+    .current-arrow-group {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .current-arrow-group.active {
+      opacity: 1;
+    }
+
+    .current-arrow-line-pos {
+      stroke: #007BFF;
+      stroke-width: 3.2;
+      stroke-dasharray: 7 5;
+      animation: flowDashRight 0.55s linear infinite;
+    }
+
+    .current-arrow-line-neg {
+      stroke: #FD7E14;
+      stroke-width: 3.2;
+      stroke-dasharray: 7 5;
+      animation: flowDashLeft 0.55s linear infinite;
+    }
+
+    @keyframes flowDashRight {
+      from { stroke-dashoffset: 24; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes flowDashLeft {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: 24; }
+    }
+
+    .current-arrow-group.paused-flow .current-arrow-line-pos,
+    .current-arrow-group.paused-flow .current-arrow-line-neg {
+      animation-play-state: paused;
+    }
+
+    .btn-sim-primary.is-running {
+      background: linear-gradient(135deg, #D9480F 0%, #FD7E14 100%);
+      box-shadow: 0 3px 10px rgba(253, 126, 20, 0.3);
+    }
+
+    .btn-sim-stop {
+      appearance: none;
+      background: #FFF4E6;
+      color: #7A3400;
+      border: 1.5px solid #FD7E14;
+      border-radius: 7px;
+      padding: 0.62rem 1rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-sim-stop:hover:not(:disabled) {
+      background: #FD7E14;
+      color: #FFFFFF;
+    }
+
+    .btn-sim-stop:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .svg-label {
+      fill: var(--text-main);
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .svg-label-accent {
+      fill: var(--itm-navy);
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 13.5px;
+      font-weight: 800;
+    }
+
+    .svg-label-sub {
+      fill: var(--text-muted);
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .feature-card {
+      background: var(--bg-pure);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .feature-item {
+      padding: 0.7rem 0.9rem;
+      border-radius: 7px;
+      background: var(--bg-light);
+      border-left: 4px solid var(--itm-blue);
+      font-size: 0.9rem;
+    }
+
+    .feature-item.pro {
+      border-left-color: var(--pwm-green);
+      background: #EBFBEE;
+    }
+
+    .feature-item.con {
+      border-left-color: var(--carrier-orange);
+      background: #FFF4E6;
+    }
+
+    .feature-item strong {
+      color: var(--itm-navy);
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.15rem;
+    }
+
+    .osc-sim-panel {
+      margin-top: 1.35rem;
+      background: var(--bg-pure);
+      border: 1px solid var(--border-color);
+      border-top: 3px solid var(--itm-blue);
+      border-radius: 8px;
+      padding: 1.15rem 1.25rem;
+    }
+
+    .osc-controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.9rem;
+    }
+
+    .osc-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-sim-primary {
+      appearance: none;
+      background: linear-gradient(135deg, var(--itm-navy) 0%, var(--itm-blue) 100%);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 7px;
+      padding: 0.65rem 1.3rem;
+      font-size: 0.94rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 3px 10px rgba(0, 86, 179, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .btn-sim-primary:hover {
+      background: linear-gradient(135deg, var(--itm-blue) 0%, var(--itm-accent) 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-sim-primary.chopper-active {
+      background: linear-gradient(135deg, #198754 0%, #146C43 100%);
+      box-shadow: 0 3px 10px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-sim-secondary {
+      appearance: none;
+      background: var(--bg-light);
+      color: var(--itm-navy);
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      padding: 0.62rem 1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-sim-secondary:hover {
+      background: #E7F1FF;
+      border-color: var(--itm-blue);
+    }
+
+    .sim-status-pill {
+      padding: 0.45rem 0.95rem;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      background: #E7F1FF;
+      color: var(--itm-navy);
+      border-left: 4px solid var(--itm-blue);
+    }
+
+    .sim-status-pill.pos {
+      background: #E7F3FF;
+      color: #004085;
+      border-left-color: #007BFF;
+    }
+
+    .sim-status-pill.neg {
+      background: #FFF4E6;
+      color: #7A3400;
+      border-left-color: #FD7E14;
+    }
+
+    /* PESTAÑA 2: 4 CUADRANTES */
+    .quadrant-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.15rem;
+    }
+
+    .quadrant-plane {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 12px;
+      padding: 18px;
+      background: var(--bg-pure);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      min-height: 310px;
+    }
+
+    .axis-label-y {
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--itm-navy);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    .axis-label-x {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--itm-navy);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    .quad-box {
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid transparent;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .quad-box:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quad-inverter {
+      background-color: #EBF3FF;
+      border-color: var(--itm-accent);
+    }
+
+    .quad-rectifier {
+      background-color: #FFF4E6;
+      border-color: var(--carrier-orange);
+    }
+
+    .quad-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .quad-badge {
+      font-size: 0.75rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-inv {
+      background-color: var(--itm-navy);
+      color: #FFFFFF;
+    }
+
+    .badge-rec {
+      background-color: var(--carrier-orange);
+      color: #FFFFFF;
+    }
+
+    .quad-math {
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0.35rem 0;
+      color: var(--text-main);
+    }
+
+    .quad-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    /* TABLA COMPARATIVA */
+    .table-wrapper {
+      overflow-x: auto;
+      background: var(--bg-pure);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    table.comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    table.comp-table th,
+    table.comp-table td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.comp-table thead th {
+      background-color: var(--itm-navy);
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    table.comp-table tbody tr:nth-child(even) {
+      background-color: var(--bg-light);
+    }
+
+    table.comp-table tbody tr:hover {
+      background-color: #EDF4FC;
+    }
+
+    .highlight-pill {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      background: #E7F1FF;
+      color: var(--itm-navy);
+    }
+
+    .topology-mini-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .topo-box {
+      background: var(--bg-pure);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--itm-blue);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+    }
+
+    .topo-box h4 {
+      color: var(--itm-navy);
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .topo-box p {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    /* CONTROLES Y SLIDERS */
+    .sim-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .control-group {
+      background: var(--bg-pure);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--itm-navy);
+      margin-bottom: 0.5rem;
+      gap: 0.5rem;
+    }
+
+    .value-readout {
+      background: var(--itm-navy);
+      color: #FFFFFF;
+      padding: 0.15rem 0.6rem;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.92rem;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--itm-blue);
+      cursor: pointer;
+      height: 6px;
+      margin: 0.4rem 0;
+    }
+
+    .range-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .Quick-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.65rem;
+    }
+
+    .preset-btn {
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      color: var(--itm-navy);
+      padding: 0.3rem 0.6rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .preset-btn:hover,
+    .preset-btn.active {
+      background: var(--itm-blue);
+      color: #FFFFFF;
+      border-color: var(--itm-blue);
+    }
+
+    .harmonic-badge {
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-left: 5px solid var(--itm-blue);
+      background-color: #E7F1FF;
+      color: var(--itm-navy);
+      margin-top: 0.75rem;
+      transition: all 0.25s ease;
+    }
+
+    .harmonic-badge.optimal {
+      background-color: #D1E7DD;
+      border-left-color: #198754;
+      color: #0F5132;
+    }
+
+    .harmonic-badge.warn {
+      background-color: #FFF0E0;
+      border-left-color: #FD7E14;
+      color: #7A3400;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+      margin-top: 0.75rem;
+    }
+
+    .metric-box {
+      background: var(--bg-pure);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.6rem;
+      text-align: center;
+    }
+
+    .metric-box span {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .metric-box strong {
+      font-size: 1rem;
+      color: var(--itm-navy);
+      font-family: monospace;
+    }
+
+    /* PANELES DE CANVAS */
+    .canvas-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-width: 0;
+    }
+
+    .canvas-card {
+      background: var(--bg-pure);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem 0.9rem;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .canvas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .canvas-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--itm-navy);
+    }
+
+    .legend-inline {
+      display: flex;
+      gap: 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    canvas {
+      width: 100% !important;
+      max-width: 100%;
+      display: block;
+      background: #FFFFFF;
+      border: 1px solid #E9ECEF;
+      border-radius: 6px;
+    }
+
+    /* ZONA DE OPERACIÓN SPWM */
+    .operation-zone {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      border-left: 6px solid var(--itm-accent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      transition: all 0.2s ease;
+    }
+
+    .zone-linear {
+      background-color: #E7F3FF;
+      border-left-color: #007BFF;
+      color: #003366;
+    }
+
+    .zone-overmod {
+      background-color: #FFF0E0;
+      border-left-color: #FD7E14;
+      color: #7A3400;
+    }
+
+    .zone-badge-title {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .zone-desc {
+      font-size: 0.92rem;
+    }
+
+    /* SECCIÓN POST-SPWM: CÁLCULO Y SIMULACIÓN DE FILTRO LC */
+    .spwm-filter-section {
+      margin-top: 1.5rem;
+      border-top: 4px solid var(--itm-blue);
+    }
+
+    .spwm-filter-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .spwm-filter-grid > *,
+    .sim-layout > * {
+      min-width: 0;
+    }
+
+    /* PIE DE PÁGINA */
+    footer {
+      background-color: var(--bg-light);
+      border-top: 2px solid var(--border-color);
+      padding: 1rem 2rem;
+      margin-top: auto;
+    }
+
+    .footer-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .footer-slots {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .footer-badge {
+      padding: 0.35rem 0.85rem;
+      border: 1px dashed var(--itm-blue);
+      border-radius: 6px;
+      color: var(--itm-navy);
+      font-weight: 600;
+      background: #FFFFFF;
+    }
+
+    /* ADAPTACIÓN RESPONSIVA MULTIPANTALLA (Portátiles 125%-150% DPI, Tablets y Móviles) */
+    @media (max-width: 1200px) {
+      .topo-selector-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .topo-menu {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .topo-view-panel.active,
+      .sim-layout,
+      .spwm-filter-grid,
+      .dashboard-grid-2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .header-container {
+        justify-content: center;
+        text-align: center;
+      }
+      header {
+        padding: 1rem 1.25rem;
+      }
+      .tabs-nav {
+        padding: 0.5rem 1rem 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topo-menu,
+      .quadrant-plane,
+      .topology-mini-cards,
+      .metrics-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .tab-btn {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.85rem;
+      }
+      .header-titles h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ENCABEZADO INSTITUCIONAL ITM -->
+  <header>
+    <div class="header-container">
+      <!-- Contenedor reservado para Logo Personal -->
+      <div class="brand-slot" title="Espacio reservado para Logo Personal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
+        <span>Logo Personal</span>
+      </div>
+
+      <div class="header-titles">
+        <h1>Inversores CC/CA: Topologías y Modulación SPWM</h1>
+        <p>Prof. Juan Pablo Villegas Ceballos | Instituto Tecnológico Metropolitano (ITM)</p>
+      </div>
+
+      <!-- Contenedor reservado para Canal de YouTube -->
+      <a href="#youtube-channel" class="brand-slot" title="Espacio reservado para Canal de YouTube" onclick="event.preventDefault();">
+        <svg viewBox="0 0 24 24" fill="#FF3B30">
+          <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6a3 3 0 0 0-2.1 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/>
+        </svg>
+        <span>Canal de YouTube</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- NAVEGACIÓN POR PESTAÑAS (4 PESTAÑAS) -->
+  <div class="tabs-bar">
+    <nav class="tabs-nav" role="tablist" aria-label="Secciones del Laboratorio">
+      <button class="tab-btn active" role="tab" aria-selected="true" data-tab="tab-topologias-base">
+        1. Topologías Base
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-topologias">
+        2. Dinámica y Topologías
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-filtro-lc">
+        3. Filtrado LC y Troceador
+      </button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-spwm">
+        4. Modulación SPWM + Filtro LC
+      </button>
+    </nav>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main>
+
+    <!-- ==========================================
+         PESTAÑA 1: TOPOLOGÍAS BASE (ACTIVA POR DEFECTO)
+         ========================================== -->
+    <section id="tab-topologias-base" class="tab-panel active" role="tabpanel">
+      <div class="topo-selector-layout">
+
+        <!-- MENÚ LATERAL DE SELECCIÓN DE TOPOLOGÍA -->
+        <aside class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Arquitecturas de Inversores</h2>
+              <p class="card-subtitle">Selecciona una topología para inspeccionar su circuito y animar su ciclo</p>
+            </div>
+          </div>
+
+          <div class="topo-menu" role="tablist" aria-label="Selector de Topología">
+            <button type="button" class="topo-nav-btn active" data-topo="topo-half-bridge" aria-selected="true">
+              <div class="topo-nav-title">
+                <span>A. Medio Puente (Half-Bridge)</span>
+                <span class="topo-nav-tag">2 T</span>
+              </div>
+              <span class="topo-nav-desc">Divisor capacitivo con punto medio y 1 rama de conmutación.</span>
+            </button>
+
+            <button type="button" class="topo-nav-btn" data-topo="topo-full-bridge" aria-selected="false">
+              <div class="topo-nav-title">
+                <span>B. Puente Completo (Full-Bridge)</span>
+                <span class="topo-nav-tag">4 T</span>
+              </div>
+              <span class="topo-nav-desc">Configuración en "H" con aprovechamiento total del bus U<sub>B</sub>.</span>
+            </button>
+
+            <button type="button" class="topo-nav-btn" data-topo="topo-push-pull" aria-selected="false">
+              <div class="topo-nav-title">
+                <span>C. Inversor Push-Pull</span>
+                <span class="topo-nav-tag">2 T + Tx</span>
+              </div>
+              <span class="topo-nav-desc">Transformador con toma central e interruptores referidos a masa.</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- CONTENEDOR DINÁMICO DE ESQUEMA SVG + TARJETA INFORMATIVA + OSCILOSCOPIO -->
+        <div class="card">
+
+          <!-- VISTA A: INVERSOR MEDIO PUENTE (HALF-BRIDGE) -->
+          <div id="topo-half-bridge" class="topo-view-panel active">
+            <div class="svg-schematic-box">
+              <div class="card-header" style="margin-bottom:0.5rem;">
+                <div>
+                  <h3 class="card-title">Esquema Eléctrico: Inversor Medio Puente (Half-Bridge)</h3>
+                  <p class="card-subtitle">Fuente DC dividida por C₁ y C₂ (U<sub>B</sub>/2) y carga entre puntos medios</p>
+                </div>
+              </div>
+
+              <!-- SVG INTEGRADO: MEDIO PUENTE -->
+              <svg class="schematic-svg" viewBox="0 0 560 350" aria-label="Esquema Inversor Medio Puente">
+                <defs>
+                  <marker id="arrowPosHB" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#007BFF" />
+                  </marker>
+                  <marker id="arrowNegHB" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#FD7E14" />
+                  </marker>
+                </defs>
+
+                <path class="svg-wire" d="M 60 40 L 420 40" />
+                <path class="svg-wire" d="M 60 310 L 420 310" />
+
+                <path class="svg-wire" d="M 60 40 L 60 150" />
+                <path class="svg-wire" d="M 60 195 L 60 310" />
+                <circle class="svg-comp" cx="60" cy="172" r="22" />
+                <text class="svg-label" x="55" y="168">+</text>
+                <text class="svg-label" x="56" y="186">&minus;</text>
+                <text class="svg-label-accent" x="14" y="177">U<tspan dy="4" font-size="10">B</tspan></text>
+
+                <path class="svg-wire" d="M 165 40 L 165 98" />
+                <line class="svg-comp" x1="145" y1="98" x2="185" y2="98" />
+                <line class="svg-comp" x1="145" y1="110" x2="185" y2="110" />
+                <text class="svg-label" x="110" y="108">C₁</text>
+                <text class="svg-label-sub" x="100" y="125">U<tspan dy="3" font-size="9">B</tspan><tspan dy="-3">/2</tspan></text>
+
+                <path class="svg-wire" d="M 165 110 L 165 240" />
+
+                <line class="svg-comp" x1="145" y1="240" x2="185" y2="240" />
+                <line class="svg-comp" x1="145" y1="252" x2="185" y2="252" />
+                <text class="svg-label" x="110" y="250">C₂</text>
+                <text class="svg-label-sub" x="100" y="267">U<tspan dy="3" font-size="9">B</tspan><tspan dy="-3">/2</tspan></text>
+                <path class="svg-wire" d="M 165 252 L 165 310" />
+
+                <path class="svg-wire" d="M 420 40 L 420 78" />
+                <g id="hb-sw-t1" class="sw-group">
+                  <rect class="svg-switch-box" x="386" y="64" width="90" height="74" rx="6" />
+                  <line class="svg-comp" x1="402" y1="86" x2="402" y2="116" />
+                  <line class="svg-comp" x1="396" y1="92" x2="396" y2="110" />
+                  <line class="svg-comp" x1="388" y1="101" x2="396" y2="101" />
+                  <path class="sw-contact" d="M 420 78 L 402 92 M 402 110 L 420 124 L 420 78" />
+                  <path class="svg-wire" d="M 420 78 L 452 78 L 452 124 L 420 124" />
+                  <polygon class="svg-comp-fill" points="452,92 444,108 460,108" />
+                  <line class="svg-comp" x1="444" y1="92" x2="460" y2="92" />
+                  <text class="svg-label-accent" x="484" y="102">T₁ / D₁</text>
+                </g>
+
+                <path class="svg-wire" d="M 420 124 L 420 226" />
+
+                <g id="hb-sw-t2" class="sw-group">
+                  <rect class="svg-switch-box" x="386" y="212" width="90" height="74" rx="6" />
+                  <line class="svg-comp" x1="402" y1="234" x2="402" y2="264" />
+                  <line class="svg-comp" x1="396" y1="240" x2="396" y2="258" />
+                  <line class="svg-comp" x1="388" y1="249" x2="396" y2="249" />
+                  <path class="sw-contact" d="M 420 226 L 402 240 M 402 258 L 420 272 L 420 226" />
+                  <path class="svg-wire" d="M 420 226 L 452 226 L 452 272 L 420 272" />
+                  <polygon class="svg-comp-fill" points="452,240 444,256 460,256" />
+                  <line class="svg-comp" x1="444" y1="240" x2="460" y2="240" />
+                  <text class="svg-label-accent" x="484" y="252">T₂ / D₂</text>
+                </g>
+
+                <path class="svg-wire" d="M 420 272 L 420 310" />
+
+                <path class="svg-wire-Load" d="M 165 175 L 225 175" />
+                <rect class="svg-load-box" x="225" y="153" width="135" height="44" rx="6" />
+                <path class="svg-comp" d="M 240 175 Q 248 160 256 175 Q 264 160 272 175 Q 280 160 288 175 L 302 175 L 307 167 L 315 183 L 323 167 L 331 183 L 336 175 L 348 175" />
+                <text class="svg-label-accent" x="256" y="145">Carga (v<tspan dy="3" font-size="9">out</tspan><tspan dy="-3">)</tspan></text>
+                <path class="svg-wire-Load" d="M 360 175 L 420 175" />
+
+                <g id="hb-arrow-pos" class="current-arrow-group">
+                  <line class="current-arrow-line-pos" x1="205" y1="214" x2="380" y2="214" marker-end="url(#arrowPosHB)" />
+                  <text x="292" y="232" fill="#007BFF" font-size="12" font-weight="800" text-anchor="middle">i(t) &rarr; (+U_B / 2)</text>
+                </g>
+                <g id="hb-arrow-neg" class="current-arrow-group">
+                  <line class="current-arrow-line-neg" x1="380" y1="214" x2="205" y2="214" marker-end="url(#arrowNegHB)" />
+                  <text x="292" y="232" fill="#FD7E14" font-size="12" font-weight="800" text-anchor="middle">&larr; i(t) (&minus;U_B / 2)</text>
+                </g>
+
+                <circle class="svg-node" cx="165" cy="40" r="4.5" />
+                <circle class="svg-node" cx="165" cy="175" r="5" />
+                <circle class="svg-node" cx="165" cy="310" r="4.5" />
+                <circle class="svg-node" cx="420" cy="175" r="5" />
+
+                <text class="svg-label-accent" x="142" y="172">O</text>
+                <text class="svg-label-accent" x="430" y="172">A</text>
+              </svg>
+            </div>
+
+            <!-- TARJETA INFORMATIVA: MEDIO PUENTE -->
+            <div class="feature-card">
+              <div>
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Características: Medio Puente</h3>
+                    <p class="card-subtitle">Síntesis bipolar referida a punto neutro capacitivo</p>
+                  </div>
+                </div>
+
+                <ul class="feature-list">
+                  <li class="feature-item">
+                    <strong>Semiconductores de Potencia</strong>
+                    2 Interruptores de potencia (T₁, T₂) con 2 diodos antiparalelos.
+                  </li>
+                  <li class="feature-item">
+                    <strong>Configuración del Bus CC</strong>
+                    Requiere referencia a punto medio de batería o divisor capacitivo balanceado (C₁, C₂).
+                  </li>
+                  <li class="feature-item pro">
+                    <strong>Tensión Máxima en Carga</strong>
+                    <span class="highlight-pill">U<sub>B</sub> / 2</span> &mdash; Excursión de salida entre +U<sub>B</sub>/2 y &minus;U<sub>B</sub>/2.
+                  </li>
+                  <li class="feature-item con">
+                    <strong>Desventaja Principal</strong>
+                    Elevado estrés de corriente para alcanzar la misma potencia (requiere el doble de corriente que el puente completo).
+                  </li>
+                </ul>
+              </div>
+
+              <div class="topo-box">
+                <h4>Secuencia de Conmutación</h4>
+                <p><strong>0 &rarr; T/2:</strong> Cierra T₁ (+U<sub>B</sub>/2). &nbsp;|&nbsp; <strong>T/2 &rarr; T:</strong> Cierra T₂ (&minus;U<sub>B</sub>/2).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- VISTA B: INVERSOR PUENTE COMPLETO (FULL-BRIDGE) -->
+          <div id="topo-full-bridge" class="topo-view-panel">
+            <div class="svg-schematic-box">
+              <div class="card-header" style="margin-bottom:0.5rem;">
+                <div>
+                  <h3 class="card-title">Esquema Eléctrico: Inversor Puente Completo (Full-Bridge)</h3>
+                  <p class="card-subtitle">Configuración en "H" con 4 interruptores (T₁–T₄) y carga entre puntos medios A y B</p>
+                </div>
+              </div>
+
+              <!-- SVG INTEGRADO: PUENTE COMPLETO -->
+              <svg class="schematic-svg" viewBox="0 0 560 350" aria-label="Esquema Inversor Puente Completo">
+                <defs>
+                  <marker id="arrowPosFB" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#007BFF" />
+                  </marker>
+                  <marker id="arrowNegFB" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#FD7E14" />
+                  </marker>
+                </defs>
+
+                <path class="svg-wire" d="M 55 38 L 445 38" />
+                <path class="svg-wire" d="M 55 312 L 445 312" />
+
+                <path class="svg-wire" d="M 55 38 L 55 150" />
+                <path class="svg-wire" d="M 55 196 L 55 312" />
+                <circle class="svg-comp" cx="55" cy="173" r="22" />
+                <text class="svg-label" x="50" y="169">+</text>
+                <text class="svg-label" x="51" y="187">&minus;</text>
+                <text class="svg-label-accent" x="12" y="178">U<tspan dy="4" font-size="10">B</tspan></text>
+
+                <path class="svg-wire" d="M 185 38 L 185 76" />
+                <g id="fb-sw-t1" class="sw-group">
+                  <rect class="svg-switch-box" x="155" y="64" width="80" height="70" rx="6" />
+                  <line class="svg-comp" x1="171" y1="84" x2="171" y2="112" />
+                  <line class="svg-comp" x1="165" y1="90" x2="165" y2="106" />
+                  <path class="sw-contact" d="M 185 76 L 171 90 M 171 106 L 185 120 L 185 76" />
+                  <path class="svg-wire" d="M 185 76 L 214 76 L 214 120 L 185 120" />
+                  <polygon class="svg-comp-fill" points="214,90 207,105 221,105" />
+                  <line class="svg-comp" x1="207" y1="90" x2="221" y2="90" />
+                  <text class="svg-label-accent" x="124" y="103">T₁</text>
+                </g>
+
+                <path class="svg-wire" d="M 185 120 L 185 228" />
+
+                <g id="fb-sw-t2" class="sw-group">
+                  <rect class="svg-switch-box" x="155" y="216" width="80" height="70" rx="6" />
+                  <line class="svg-comp" x1="171" y1="236" x2="171" y2="264" />
+                  <line class="svg-comp" x1="165" y1="242" x2="165" y2="258" />
+                  <path class="sw-contact" d="M 185 228 L 171 242 M 171 258 L 185 272 L 185 228" />
+                  <path class="svg-wire" d="M 185 228 L 214 228 L 214 272 L 185 272" />
+                  <polygon class="svg-comp-fill" points="214,242 207,257 221,257" />
+                  <line class="svg-comp" x1="207" y1="242" x2="221" y2="242" />
+                  <text class="svg-label-accent" x="124" y="255">T₂</text>
+                </g>
+                <path class="svg-wire" d="M 185 272 L 185 312" />
+
+                <path class="svg-wire" d="M 445 38 L 445 76" />
+                <g id="fb-sw-t3" class="sw-group">
+                  <rect class="svg-switch-box" x="415" y="64" width="80" height="70" rx="6" />
+                  <line class="svg-comp" x1="431" y1="84" x2="431" y2="112" />
+                  <line class="svg-comp" x1="425" y1="90" x2="425" y2="106" />
+                  <path class="sw-contact" d="M 445 76 L 431 90 M 431 106 L 445 120 L 445 76" />
+                  <path class="svg-wire" d="M 445 76 L 474 76 L 474 120 L 445 120" />
+                  <polygon class="svg-comp-fill" points="474,90 467,105 481,105" />
+                  <line class="svg-comp" x1="467" y1="90" x2="481" y2="90" />
+                  <text class="svg-label-accent" x="502" y="103">T₃</text>
+                </g>
+
+                <path class="svg-wire" d="M 445 120 L 445 228" />
+
+                <g id="fb-sw-t4" class="sw-group">
+                  <rect class="svg-switch-box" x="415" y="216" width="80" height="70" rx="6" />
+                  <line class="svg-comp" x1="431" y1="236" x2="431" y2="264" />
+                  <line class="svg-comp" x1="425" y1="242" x2="425" y2="258" />
+                  <path class="sw-contact" d="M 445 228 L 431 242 M 431 258 L 445 272 L 445 228" />
+                  <path class="svg-wire" d="M 445 228 L 474 228 L 474 272 L 445 272" />
+                  <polygon class="svg-comp-fill" points="474,242 467,257 481,257" />
+                  <line class="svg-comp" x1="467" y1="242" x2="481" y2="242" />
+                  <text class="svg-label-accent" x="502" y="255">T₄</text>
+                </g>
+                <path class="svg-wire" d="M 445 272 L 445 312" />
+
+                <path class="svg-wire-Load" d="M 185 175 L 250 175" />
+                <rect class="svg-load-box" x="250" y="153" width="130" height="44" rx="6" />
+                <path class="svg-comp" d="M 262 175 Q 270 160 278 175 Q 286 160 294 175 Q 302 160 310 175 L 322 175 L 327 167 L 335 183 L 343 167 L 351 183 L 356 175 L 368 175" />
+                <text class="svg-label-accent" x="275" y="145">Carga (v<tspan dy="3" font-size="9">out</tspan><tspan dy="-3">)</tspan></text>
+                <path class="svg-wire-Load" d="M 380 175 L 445 175" />
+
+                <g id="fb-arrow-pos" class="current-arrow-group">
+                  <line class="current-arrow-line-pos" x1="225" y1="212" x2="405" y2="212" marker-end="url(#arrowPosFB)" />
+                  <text x="315" y="230" fill="#007BFF" font-size="12" font-weight="800" text-anchor="middle">i(t) &rarr; (+U_B : T₁ y T₄ ON)</text>
+                </g>
+                <g id="fb-arrow-neg" class="current-arrow-group">
+                  <line class="current-arrow-line-neg" x1="405" y1="212" x2="225" y2="212" marker-end="url(#arrowNegFB)" />
+                  <text x="315" y="230" fill="#FD7E14" font-size="12" font-weight="800" text-anchor="middle">&larr; i(t) (&minus;U_B : T₂ y T₃ ON)</text>
+                </g>
+
+                <circle class="svg-node" cx="185" cy="38" r="4.5" />
+                <circle class="svg-node" cx="185" cy="175" r="5" />
+                <circle class="svg-node" cx="185" cy="312" r="4.5" />
+                <circle class="svg-node" cx="445" cy="175" r="5" />
+
+                <text class="svg-label-accent" x="163" y="170">A</text>
+                <text class="svg-label-accent" x="455" y="170">B</text>
+              </svg>
+            </div>
+
+            <!-- TARJETA INFORMATIVA: PUENTE COMPLETO -->
+            <div class="feature-card">
+              <div>
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Características: Puente Completo</h3>
+                    <p class="card-subtitle">Topología en Puente H de máximo aprovechamiento de tensión</p>
+                  </div>
+                </div>
+
+                <ul class="feature-list">
+                  <li class="feature-item">
+                    <strong>Semiconductores de Potencia</strong>
+                    4 Interruptores de potencia (T₁, T₂ en rama A; T₃, T₄ en rama B) con diodos antiparalelos.
+                  </li>
+                  <li class="feature-item pro">
+                    <strong>Tensión Máxima en Carga</strong>
+                    <span class="highlight-pill">U<sub>B</sub></span> (el doble que el medio puente).
+                  </li>
+                  <li class="feature-item pro">
+                    <strong>Ventaja Principal</strong>
+                    Menor estrés de corriente (requiere la mitad de corriente que el medio puente para entregar igual potencia).
+                  </li>
+                  <li class="feature-item con">
+                    <strong>Desventaja Principal</strong>
+                    Control más complejo (requiere circuitos <i>bootstrap</i> o fuentes aisladas para disparar los interruptores superiores T₁ y T₃).
+                  </li>
+                </ul>
+              </div>
+
+              <div class="topo-box">
+                <h4>Secuencia de Conmutación</h4>
+                <p><strong>0 &rarr; T/2:</strong> Cierran T₁ y T₄ (+U<sub>B</sub>). &nbsp;|&nbsp; <strong>T/2 &rarr; T:</strong> Cierran T₂ y T₃ (&minus;U<sub>B</sub>).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- VISTA C: INVERSOR PUSH-PULL -->
+          <div id="topo-push-pull" class="topo-view-panel">
+            <div class="svg-schematic-box">
+              <div class="card-header" style="margin-bottom:0.5rem;">
+                <div>
+                  <h3 class="card-title">Esquema Eléctrico: Inversor Push-Pull</h3>
+                  <p class="card-subtitle">Transformador con toma central en primario e interruptores T₁ y T₂ referidos a masa común</p>
+                </div>
+              </div>
+
+              <!-- SVG INTEGRADO: PUSH-PULL -->
+              <svg class="schematic-svg" viewBox="0 0 560 350" aria-label="Esquema Inversor Push-Pull">
+                <defs>
+                  <marker id="arrowPosPP" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#007BFF" />
+                  </marker>
+                  <marker id="arrowNegPP" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#FD7E14" />
+                  </marker>
+                </defs>
+
+                <path class="svg-wire" d="M 55 155 L 55 105 L 220 105 L 220 155 L 265 155" />
+                <path class="svg-wire" d="M 55 200 L 55 312" />
+                <circle class="svg-comp" cx="55" cy="177" r="22" />
+                <text class="svg-label" x="50" y="173">+</text>
+                <text class="svg-label" x="51" y="191">&minus;</text>
+                <text class="svg-label-accent" x="12" y="182">U<tspan dy="4" font-size="10">B</tspan></text>
+
+                <line class="svg-comp" x1="41" y1="312" x2="69" y2="312" />
+                <line class="svg-comp" x1="46" y1="318" x2="64" y2="318" />
+                <line class="svg-comp" x1="51" y1="324" x2="59" y2="324" />
+
+                <path class="svg-wire" d="M 265 75 L 145 75 L 145 215" />
+                <path class="svg-comp" d="M 265 75 Q 285 85 265 95 Q 285 105 265 115 Q 285 125 265 135 Q 285 145 265 155" />
+                <path class="svg-comp" d="M 265 155 Q 285 165 265 175 Q 285 185 265 195 Q 285 205 265 215 Q 285 225 265 235" />
+                <path class="svg-wire" d="M 265 235 L 330 235" />
+
+                <line class="svg-comp" x1="295" y1="65" x2="295" y2="240" />
+                <line class="svg-comp" x1="303" y1="65" x2="303" y2="240" />
+                <text class="svg-label-sub" x="280" y="54">1 : n</text>
+
+                <path class="svg-comp" d="M 325 85 Q 307 98 325 111 Q 307 124 325 137 Q 307 150 325 163 Q 307 176 325 189 Q 307 202 325 215" />
+                <path class="svg-wire-Load" d="M 325 85 L 365 85" />
+                <rect class="svg-load-box" x="365" y="65" width="130" height="40" rx="6" />
+                <text class="svg-label-accent" x="392" y="90">Carga (v<tspan dy="3" font-size="9">out</tspan><tspan dy="-3">)</tspan></text>
+                <path class="svg-wire-Load" d="M 495 85 L 530 85 L 530 215 L 325 215" />
+
+                <g id="pp-arrow-pos" class="current-arrow-group">
+                  <line class="current-arrow-line-pos" x1="355" y1="122" x2="505" y2="122" marker-end="url(#arrowPosPP)" />
+                  <text x="430" y="138" fill="#007BFF" font-size="11.5" font-weight="800" text-anchor="middle">i(t) &rarr; (+n·U_B : T₁ ON)</text>
+                </g>
+                <g id="pp-arrow-neg" class="current-arrow-group">
+                  <line class="current-arrow-line-neg" x1="505" y1="122" x2="355" y2="122" marker-end="url(#arrowNegPP)" />
+                  <text x="430" y="138" fill="#FD7E14" font-size="11.5" font-weight="800" text-anchor="middle">&larr; i(t) (&minus;n·U_B : T₂ ON)</text>
+                </g>
+
+                <g id="pp-sw-t1" class="sw-group">
+                  <rect class="svg-switch-box" x="115" y="215" width="80" height="72" rx="6" />
+                  <line class="svg-comp" x1="131" y1="234" x2="131" y2="262" />
+                  <line class="svg-comp" x1="125" y1="240" x2="125" y2="256" />
+                  <path class="sw-contact" d="M 145 215 L 145 225 L 131 240 M 131 256 L 145 272 L 145 225" />
+                  <path class="svg-wire" d="M 145 225 L 174 225 L 174 272 L 145 272" />
+                  <polygon class="svg-comp-fill" points="174,240 167,255 181,255" />
+                  <line class="svg-comp" x1="167" y1="240" x2="181" y2="240" />
+                  <text class="svg-label-accent" x="85" y="255">T₁</text>
+                </g>
+                <path class="svg-wire" d="M 145 272 L 145 312" />
+                <line class="svg-comp" x1="131" y1="312" x2="159" y2="312" />
+                <line class="svg-comp" x1="136" y1="318" x2="154" y2="318" />
+                <line class="svg-comp" x1="141" y1="324" x2="149" y2="324" />
+
+                <g id="pp-sw-t2" class="sw-group">
+                  <rect class="svg-switch-box" x="300" y="242" width="80" height="62" rx="6" />
+                  <line class="svg-comp" x1="316" y1="256" x2="316" y2="282" />
+                  <line class="svg-comp" x1="310" y1="262" x2="310" y2="276" />
+                  <path class="sw-contact" d="M 330 235 L 330 248 L 316 262 M 316 276 L 330 290 L 330 248" />
+                  <path class="svg-wire" d="M 330 248 L 359 248 L 359 290 L 330 290" />
+                  <polygon class="svg-comp-fill" points="359,262 352,276 366,276" />
+                  <line class="svg-comp" x1="352" y1="262" x2="366" y2="262" />
+                  <text class="svg-label-accent" x="386" y="276">T₂</text>
+                </g>
+                <path class="svg-wire" d="M 330 290 L 330 312" />
+                <line class="svg-comp" x1="316" y1="312" x2="344" y2="312" />
+                <line class="svg-comp" x1="321" y1="318" x2="339" y2="318" />
+                <line class="svg-comp" x1="326" y1="324" x2="334" y2="324" />
+
+                <circle class="svg-node" cx="265" cy="155" r="5" />
+                <text class="svg-label-accent" x="172" y="146">Toma Central</text>
+              </svg>
+            </div>
+
+            <!-- TARJETA INFORMATIVA: PUSH-PULL -->
+            <div class="feature-card">
+              <div>
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Características: Inversor Push-Pull</h3>
+                    <p class="card-subtitle">Aislamiento galvánico y disparo referido a masa común</p>
+                  </div>
+                </div>
+
+                <ul class="feature-list">
+                  <li class="feature-item pro">
+                    <strong>Gobernabilidad de Disparo</strong>
+                    2 Interruptores referidos a masa (gobernabilidad muy sencilla sin circuitos flotantes).
+                  </li>
+                  <li class="feature-item pro">
+                    <strong>Escalabilidad y Aislamiento</strong>
+                    Tensión de salida escalable mediante la relación de transformación del transformador.
+                  </li>
+                  <li class="feature-item con">
+                    <strong>Desventaja Crítica (Estrés de Tensión)</strong>
+                    Altísimo estrés de tensión en los interruptores: deben soportar al menos <span class="highlight-pill">2 &middot; U<sub>B</sub></span> más los picos por inductancia de dispersión.
+                  </li>
+                  <li class="feature-item">
+                    <strong>Rango de Aplicación</strong>
+                    Limitado a potencias bajas (<strong>&lt; 10 kVA</strong>) y sistemas alimentados por baterías de baja tensión.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="topo-box">
+                <h4>Secuencia de Conmutación</h4>
+                <p><strong>0 &rarr; T/2:</strong> Cierra T₁ (+n·U<sub>B</sub>). &nbsp;|&nbsp; <strong>T/2 &rarr; T:</strong> Cierra T₂ (&minus;n·U<sub>B</sub>).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- OSCILOSCOPIO INTERACTIVO Y ANIMACIÓN PASO A PASO (PESTAÑA 1) -->
+          <div class="osc-sim-panel">
+            <div class="osc-controls-bar">
+              <div class="osc-btn-group">
+                <button type="button" id="btnSimCycle" class="btn-sim-primary">
+                  <svg id="btnSimIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <span id="btnSimLabel">Animar Conmutación (Simular Ciclo a Paso)</span>
+                </button>
+                <button type="button" id="btnPauseCycle" class="btn-sim-stop" disabled title="Detener la simulación en el instante actual">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="5" y="4" width="5" height="16" rx="1"></rect>
+                    <rect x="14" y="4" width="5" height="16" rx="1"></rect>
+                  </svg>
+                  <span>Detener aquí</span>
+                </button>
+                <button type="button" id="btnResetCycle" class="btn-sim-secondary">
+                  Reiniciar (t = 0)
+                </button>
+              </div>
+
+              <div id="simStateIndicator" class="sim-status-pill" aria-live="polite">
+                Estado: Reposo (Interruptores abiertos)
+              </div>
+            </div>
+
+            <div class="canvas-header" style="margin-bottom:0.4rem;">
+              <span class="canvas-title">Osciloscopio de Síntesis: Tensión de Salida en Carga v<sub>out</sub>(t) vs. Tiempo (t)</span>
+              <div class="legend-inline">
+                <span class="legend-item"><span class="legend-dot" style="background:#007BFF;"></span> Semiciclo Positivo (0 a T/2)</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#FD7E14;"></span> Semiciclo Negativo (T/2 a T)</span>
+              </div>
+            </div>
+            <canvas id="canvasTopoOsc" height="165"></canvas>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 2: DINÁMICA Y TOPOLOGÍAS
+         ========================================== -->
+    <section id="tab-topologias" class="tab-panel" role="tabpanel">
+      <div class="dashboard-grid-2">
+
+        <!-- CONTENIDO A: LOS 4 CUADRANTES DEL FLUJO DE POTENCIA -->
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Los 4 Cuadrantes del Flujo de Potencia Instantánea</h2>
+              <p class="card-subtitle">Operación bidireccional según la polaridad de tensión (<i>V</i><sub>0</sub>) y corriente (<i>I</i><sub>0</sub>) en la carga</p>
+            </div>
+          </div>
+
+          <div class="quadrant-layout">
+            <div class="quadrant-plane" aria-label="Plano de 4 cuadrantes de potencia">
+              <span class="axis-label-y">+ V₀ (Tensión)</span>
+              <span class="axis-label-x">+ I₀ (Corriente)</span>
+
+              <div class="quad-box quad-rectifier">
+                <div class="quad-head">
+                  <span>Cuadrante II (Q2)</span>
+                  <span class="quad-badge badge-rec">Rectificador</span>
+                </div>
+                <div class="quad-math">V₀ &gt; 0 , I₀ &lt; 0 &nbsp;&rarr;&nbsp; p₀ = V₀·I₀ &lt; 0</div>
+                <p class="quad-desc">
+                  <strong>Potencia absorbida (<i>p</i><sub>0</sub> &lt; 0):</strong> La carga reactiva devuelve energía hacia la fuente CC a través de los diodos en antiparalelo.
+                </p>
+              </div>
+
+              <div class="quad-box quad-inverter">
+                <div class="quad-head">
+                  <span>Cuadrante I (Q1)</span>
+                  <span class="quad-badge badge-inv">Inversor</span>
+                </div>
+                <div class="quad-math">V₀ &gt; 0 , I₀ &gt; 0 &nbsp;&rarr;&nbsp; p₀ = V₀·I₀ &gt; 0</div>
+                <p class="quad-desc">
+                  <strong>Potencia entregada (<i>p</i><sub>0</sub> &gt; 0):</strong> Flujo activo desde el bus CC hacia la carga CA (conducción de interruptores controlados).
+                </p>
+              </div>
+
+              <div class="quad-box quad-inverter">
+                <div class="quad-head">
+                  <span>Cuadrante III (Q3)</span>
+                  <span class="quad-badge badge-inv">Inversor</span>
+                </div>
+                <div class="quad-math">V₀ &lt; 0 , I₀ &lt; 0 &nbsp;&rarr;&nbsp; p₀ = V₀·I₀ &gt; 0</div>
+                <p class="quad-desc">
+                  <strong>Potencia entregada (<i>p</i><sub>0</sub> &gt; 0):</strong> Semiciclo negativo activo. Tanto tensión como corriente son negativas, entregando potencia a la carga.
+                </p>
+              </div>
+
+              <div class="quad-box quad-rectifier">
+                <div class="quad-head">
+                  <span>Cuadrante IV (Q4)</span>
+                  <span class="quad-badge badge-rec">Rectificador</span>
+                </div>
+                <div class="quad-math">V₀ &lt; 0 , I₀ &gt; 0 &nbsp;&rarr;&nbsp; p₀ = V₀·I₀ &lt; 0</div>
+                <p class="quad-desc">
+                  <strong>Potencia absorbida (<i>p</i><sub>0</sub> &lt; 0):</strong> Retorno regenerativo durante la conmutación con corriente inductiva aún positiva.
+                </p>
+              </div>
+            </div>
+
+            <div class="topo-box">
+              <h4>Principio Energético Instantáneo: <i>p</i><sub>0</sub>(<i>t</i>) = <i>v</i><sub>0</sub>(<i>t</i>) · <i>i</i><sub>0</sub>(<i>t</i>)</h4>
+              <p>
+                En cargas inductivas (RL), la corriente <i>I</i><sub>0</sub> se atrasa respecto a la tensión <i>V</i><sub>0</sub>. Por ello, durante cada período el convertidor alterna entre <strong>Inversor (Q1 y Q3, <i>p</i><sub>0</sub> &gt; 0)</strong> y <strong>Rectificador regenerativo (Q2 y Q4, <i>p</i><sub>0</sub> &lt; 0)</strong>.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- CONTENIDO B: MATRIZ COMPARATIVA MEDIO PUENTE VS PUENTE COMPLETO -->
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Matriz Comparativa: Medio Puente vs. Puente Completo</h2>
+              <p class="card-subtitle">Análisis de prestaciones eléctricas y exigencia sobre semiconductores</p>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="comp-table">
+              <thead>
+                <tr>
+                  <th>Parámetro Técnico</th>
+                  <th>Medio Puente (Half-Bridge)</th>
+                  <th>Puente Completo (Full-Bridge)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Número de Interruptores</strong></td>
+                  <td><span class="highlight-pill">2 Interruptores</span> + 2 Diodos</td>
+                  <td><span class="highlight-pill">4 Interruptores</span> + 4 Diodos</td>
+                </tr>
+                <tr>
+                  <td><strong>Tensión Máxima en Carga</strong></td>
+                  <td><span class="highlight-pill">± U<sub>B</sub> / 2</span> (La mitad del bus CC)</td>
+                  <td><span class="highlight-pill">± U<sub>B</sub></span> (Plena tensión del bus CC)</td>
+                </tr>
+                <tr>
+                  <td><strong>Estrés de Corriente en Conmutadores</strong></td>
+                  <td><strong>Mayor estrés de corriente</strong> (para igual potencia requiere el doble de corriente)</td>
+                  <td><strong>Menor estrés de corriente</strong> (la mitad de corriente para igual potencia de salida)</td>
+                </tr>
+                <tr>
+                  <td><strong>Divisor Capacitivo en Bus CC</strong></td>
+                  <td>Requerido (2 condensadores grandes para punto neutro <i>U<sub>B</sub></i>/2)</td>
+                  <td>No requiere toma central capacitiva</td>
+                </tr>
+                <tr>
+                  <td><strong>Niveles de Tensión de Salida</strong></td>
+                  <td>2 niveles (+<i>U<sub>B</sub></i>/2, &minus;<i>U<sub>B</sub></i>/2)</td>
+                  <td>2 niveles (Bipolar: ±<i>U<sub>B</sub></i>) o 3 niveles (Unipolar: +<i>U<sub>B</sub></i>, 0, &minus;<i>U<sub>B</sub></i>)</td>
+                </tr>
+                <tr>
+                  <td><strong>Potencia de Salida Relativa</strong></td>
+                  <td>Base de referencia (<i>P<sub>ref</sub></i>)</td>
+                  <td>Hasta <strong>4 veces mayor</strong> para carga resistiva idéntica, o doble para igual corriente</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="topology-mini-cards">
+            <div class="topo-box">
+              <h4>Medio Puente (Half-Bridge)</h4>
+              <p>
+                Ideal para aplicaciones de baja potencia y costo reducido. Exige condensadores de bus perfectamente balanceados para evitar deriva de tensión continua.
+              </p>
+            </div>
+            <div class="topo-box">
+              <h4>Puente Completo (Full-Bridge / Puente H)</h4>
+              <p>
+                Estándar industrial en media y alta potencia. Aprovecha el 100% de la tensión <i>U<sub>B</sub></i> con la mitad de corriente por interruptor.
+              </p>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 3: FILTRADO LC DE SALIDA Y FORMA TROCEADOR
+         ========================================== -->
+    <section id="tab-filtro-lc" class="tab-panel" role="tabpanel">
+      <div class="sim-layout">
+
+        <!-- PANEL DE CONTROL IZQUIERDO: DIMENSIONAMIENTO LC Y BOTÓN TROCEADOR -->
+        <aside class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Diseño del Filtro Pasa-Bajas LC</h2>
+              <p class="card-subtitle">Simulación a <i>f<sub>c</sub> = f<sub>red</sub></i> + 10 Hz vs. Modo Troceador</p>
+            </div>
+          </div>
+
+          <!-- Botón para activar/desactivar la Forma Troceador -->
+          <div class="control-group" style="text-align:center;">
+            <button type="button" id="btnToggleChopper" class="btn-sim-primary" style="width:100%; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              <span id="chopperBtnText">Activar Forma Troceador (Frecuencia y Pulso Fijos)</span>
+            </button>
+            <p id="chopperModeSub" style="font-size:0.8rem; color:var(--text-muted); margin-top:0.5rem;">
+              Modo actual: <strong>Onda Cuadrada (Pulso Único)</strong>. Requiere filtro LC voluminoso sintonizado a <i>f<sub>red</sub></i> + 10 Hz.
+            </p>
+          </div>
+
+          <!-- Selector de Frecuencia de Red -->
+          <div class="control-group">
+            <div class="control-label">
+              <span>Frecuencia de Red (<i>f<sub>red</sub></i>)</span>
+              <span id="fGridReadout" class="value-readout">60 Hz (f_c base = 70 Hz)</span>
+            </div>
+            <div class="Quick-btns">
+              <button type="button" class="preset-btn" data-fgrid="50">Red 50 Hz (f_c = 60 Hz)</button>
+              <button type="button" class="preset-btn active" data-fgrid="60">Red 60 Hz (f_c = 70 Hz)</button>
+            </div>
+          </div>
+
+          <!-- Slider Inductancia L -->
+          <div class="control-group">
+            <div class="control-label">
+              <label for="filterLSlider">Inductancia del Filtro (<i>L</i>)</label>
+              <span id="filterLValue" class="value-readout">22.7 mH</span>
+            </div>
+            <input type="range" id="filterLSlider" min="1.0" max="45.0" step="0.5" value="22.7" />
+            <div class="range-ticks">
+              <span>1.0 mH</span>
+              <span>22.7 mH (f_red+10Hz)</span>
+              <span>45.0 mH</span>
+            </div>
+          </div>
+
+          <!-- Slider Capacitancia C -->
+          <div class="control-group">
+            <div class="control-label">
+              <label for="filterCSlider">Capacitancia del Filtro (<i>C</i>)</label>
+              <span id="filterCValue" class="value-readout">227 µF</span>
+            </div>
+            <input type="range" id="filterCSlider" min="10" max="450" step="5" value="227" />
+            <div class="range-ticks">
+              <span>10 µF</span>
+              <span>227 µF (f_red+10Hz)</span>
+              <span>450 µF</span>
+            </div>
+
+            <div class="Quick-btns" style="margin-top:0.75rem;">
+              <button type="button" id="btnPresetSquareLC" class="preset-btn active">
+                Sintonizar a f_red + 10 Hz (LC Grande)
+              </button>
+              <button type="button" id="btnPresetChopperLC" class="preset-btn">
+                Filtro Reducido Troceador (LC Pequeño)
+              </button>
+            </div>
+          </div>
+
+          <!-- Métricas del filtro LC -->
+          <div class="metrics-grid">
+            <div class="metric-box">
+              <span>Frecuencia de Corte f<sub>c</sub></span>
+              <strong id="fcReadout">70.0 Hz</strong>
+            </div>
+            <div class="metric-box">
+              <span>Producto LC Relativo</span>
+              <strong id="lcReductionReadout">100.0 %</strong>
+            </div>
+            <div class="metric-box">
+              <span>Armónico Dominante Entrada</span>
+              <strong id="domHarmReadout">3° (180 Hz)</strong>
+            </div>
+            <div class="metric-box">
+              <span>THD Tensión Filtrada</span>
+              <strong id="thdFilterReadout">11.4 %</strong>
+            </div>
+          </div>
+
+          <div id="lcComparisonBadge" class="harmonic-badge">
+            En onda cuadrada el 3er armónico (3·f<sub>red</sub>) está muy cerca de la fundamental, obligando a diseñar f<sub>c</sub> = f<sub>red</sub> + 10 Hz con valores L y C muy elevados.
+          </div>
+        </aside>
+
+        <!-- PANEL CENTRAL DERECHO: ESQUEMA DEL FILTRO LC + GRÁFICAS DE FILTRADO -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Etapa de Filtrado LC de Salida: Inversor &rarr; Filtro L-C &rarr; Carga</h2>
+              <p class="card-subtitle">El filtro ofrece alta impedancia serie (<i>Z<sub>L</sub></i>) a los armónicos y baja impedancia paralelo (<i>Z<sub>C</sub></i>), dejando pasar el 1er armónico</p>
+            </div>
+            <div class="legend-inline">
+              <span class="legend-item"><span class="legend-dot" style="background:#ADB5BD;"></span> Entrada Conmutada u<sub>e</sub>(t)</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#007BFF;"></span> Fundamental Ideal (1er Arm.)</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#198754;"></span> Salida Filtrada en Carga u<sub>s</sub>(t)</span>
+            </div>
+          </div>
+
+          <!-- ESQUEMA SVG DEL FILTRO L-C CONECTADO A LA CARGA -->
+          <div class="canvas-card" style="margin-bottom:1rem;">
+            <svg viewBox="0 0 680 125" style="width:100%; max-height:125px; display:block;" aria-label="Esquema del Filtro LC de Salida">
+              <!-- Bloque Inversor / Troceador -->
+              <rect x="18" y="22" width="125" height="80" rx="8" fill="#EBF3FF" stroke="#003366" stroke-width="2.2" />
+              <text x="80" y="55" fill="#003366" font-size="13" font-weight="800" text-anchor="middle">INVERSOR</text>
+              <text id="svgInvModeLabel" x="80" y="75" fill="#0056B3" font-size="11" font-weight="700" text-anchor="middle">[Onda Cuadrada]</text>
+
+              <!-- Línea salida inversor u_e -->
+              <path class="svg-wire" d="M 143 40 L 210 40" />
+              <text class="svg-label-accent" x="175" y="32" text-anchor="middle">u<tspan dy="3" font-size="9">e</tspan><tspan dy="-3">(t)</tspan></text>
+
+              <!-- Inductor Serie L -->
+              <path class="svg-comp" d="M 210 40 Q 222 18 234 40 Q 246 18 258 40 Q 270 18 282 40 Q 294 18 306 40" />
+              <text id="svgLValText" class="svg-label-accent" x="258" y="16" text-anchor="middle">L = 22.7 mH</text>
+
+              <path class="svg-wire" d="M 306 40 L 490 40" />
+
+              <!-- Rama Condensador Paralelo C (x = 390) -->
+              <path class="svg-wire" d="M 390 40 L 390 64" />
+              <line class="svg-comp" x1="370" y1="64" x2="410" y2="64" />
+              <line class="svg-comp" x1="370" y1="74" x2="410" y2="74" />
+              <path class="svg-wire" d="M 390 74 L 390 98" />
+              <text id="svgCValText" class="svg-label-accent" x="358" y="73" text-anchor="end">C = 227 µF</text>
+
+              <!-- Retorno inferior -->
+              <path class="svg-wire" d="M 143 98 L 490 98" />
+              <circle class="svg-node" cx="390" cy="40" r="4" />
+              <circle class="svg-node" cx="390" cy="98" r="4" />
+
+              <!-- Carga en Salida (x = 490..560) -->
+              <path class="svg-wire-Load" d="M 490 40 L 535 40 L 535 50" />
+              <rect class="svg-load-box" x="505" y="50" width="60" height="38" rx="5" />
+              <text class="svg-label-accent" x="535" y="73" text-anchor="middle">CARGA</text>
+              <path class="svg-wire-Load" d="M 535 88 L 535 98 L 490 98" />
+
+              <!-- Etiqueta de Frecuencia de Corte -->
+              <rect x="580" y="34" width="90" height="52" rx="6" fill="#F8F9FA" stroke="#DEE2E6" />
+              <text x="625" y="53" fill="#495057" font-size="10.5" font-weight="700" text-anchor="middle">Corte Filtro</text>
+              <text id="svgFcBadge" x="625" y="73" fill="#003366" font-size="13" font-weight="800" text-anchor="middle">f_c = 70 Hz</text>
+            </svg>
+          </div>
+
+          <div class="canvas-stack">
+            <div class="canvas-card">
+              <div class="canvas-header">
+                <span class="canvas-title">1. Tensión en Entrada del Filtro u<sub>e</sub>(t) vs. Tensión Filtrada en Carga u<sub>s</sub>(t)</span>
+                <span class="card-subtitle" id="filterGraphSubtitle">Simulación en régimen permanente con f<sub>c</sub> = 1 / (2&pi;&radic;LC)</span>
+              </div>
+              <canvas id="canvasLCWaveforms" height="200"></canvas>
+            </div>
+
+            <div class="canvas-card">
+              <div class="canvas-header">
+                <span class="canvas-title">2. Respuesta en Frecuencia del Filtro |H(j&omega;)| y Ubicación de Armónicos</span>
+                <span class="card-subtitle">Observa cómo el modo troceador desplaza los armónicos hacia la zona de alta atenuación del filtro LC</span>
+              </div>
+              <canvas id="canvasLCBode" height="145"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 4: SIMULADOR SPWM BIPOLAR + FILTRO LC
+         ========================================== -->
+    <section id="tab-spwm" class="tab-panel" role="tabpanel">
+      <div class="sim-layout">
+
+        <!-- PANEL IZQUIERDO: SLIDERS INTERACTIVOS SPWM -->
+        <aside class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Parámetros de Modulación SPWM</h2>
+              <p class="card-subtitle">Control SPWM Bipolar en tiempo real</p>
+            </div>
+          </div>
+
+          <!-- Slider m_a -->
+          <div class="control-group">
+            <div class="control-label">
+              <label for="maSlider">Índice de Amplitud (<i>m<sub>a</sub></i>)</label>
+              <span id="maValue" class="value-readout">0.80</span>
+            </div>
+            <input type="range" id="maSlider" min="0.0" max="1.5" step="0.05" value="0.8" />
+            <div class="range-ticks">
+              <span>0.0</span>
+              <span>0.5</span>
+              <span>1.0 (Límite)</span>
+              <span>1.5</span>
+            </div>
+            <div class="Quick-btns">
+              <button type="button" class="preset-btn" data-ma="0.4">mₐ = 0.4</button>
+              <button type="button" class="preset-btn active" data-ma="0.8">mₐ = 0.8</button>
+              <button type="button" class="preset-btn" data-ma="1.0">mₐ = 1.0</button>
+              <button type="button" class="preset-btn" data-ma="1.3">mₐ = 1.3 (Sobremod.)</button>
+            </div>
+          </div>
+
+          <!-- Slider m_f con advertencia de límite de portadora -->
+          <div class="control-group">
+            <div class="control-label">
+              <label for="mfSlider">Índice de Frecuencia (<i>m<sub>f</sub> = f<sub>tri</sub> / f<sub>sin</sub></i>)</label>
+              <span id="mfValue" class="value-readout">21</span>
+            </div>
+            <input type="range" id="mfSlider" min="3" max="45" step="2" value="21" />
+            <div class="range-ticks">
+              <span>3</span>
+              <span>9</span>
+              <span>15</span>
+              <span>21 (Óptimo)</span>
+              <span>33</span>
+              <span>45 (Límite)</span>
+            </div>
+            <div class="Quick-btns">
+              <button type="button" class="preset-btn" data-mf="9">m_f = 9</button>
+              <button type="button" class="preset-btn" data-mf="15">m_f = 15</button>
+              <button type="button" class="preset-btn active" data-mf="21">m_f = 21</button>
+              <button type="button" class="preset-btn" data-mf="33">m_f = 33</button>
+            </div>
+          </div>
+
+          <!-- Alerta sobre el Límite de la Frecuencia Portadora -->
+          <div id="carrierLimitBox" class="harmonic-badge optimal">
+            <strong>Frecuencia Portadora: f<sub>tri</sub> = 1260 Hz (m<sub>f</sub> = 21).</strong><br/>
+            Punto de equilibrio: armónicos alejados de la fundamental sin pérdidas excesivas de conmutación.
+          </div>
+
+          <!-- Resumen de reglas de conmutación -->
+          <div class="topo-box" style="margin-top:0.85rem;">
+            <h4>Lógica de Síntesis Bipolar</h4>
+            <p style="margin-bottom:0.35rem;">
+              &bull; Si <strong>V<sub>senoidal</sub> &gt; V<sub>triangular</sub></strong> &rarr; <span style="color:#198754;font-weight:700;">V<sub>AB</sub> = +V<sub>cc</sub></span>
+            </p>
+            <p>
+              &bull; Si <strong>V<sub>senoidal</sub> &lt; V<sub>triangular</sub></strong> &rarr; <span style="color:#003366;font-weight:700;">V<sub>AB</sub> = &minus;V<sub>cc</sub></span>
+            </p>
+          </div>
+        </aside>
+
+        <!-- PANEL CENTRAL: GRÁFICAS SINCRONIZADAS Y ZONA DE OPERACIÓN -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Simulador Matemático de Conmutación SPWM Bipolar</h2>
+              <p class="card-subtitle">Comparación instantánea entre onda moduladora senoidal y portadora triangular simétrica</p>
+            </div>
+            <div class="legend-inline">
+              <span class="legend-item"><span class="legend-dot" style="background:#007BFF;"></span> Moduladora (Senoidal, mₐ)</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#FD7E14;"></span> Portadora (Triangular, m_f)</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#198754;"></span> Tren de Pulsos PWM (V<sub>AB</sub>)</span>
+            </div>
+          </div>
+
+          <div class="canvas-stack">
+            <!-- Panel Gráfico Superior -->
+            <div class="canvas-card">
+              <div class="canvas-header">
+                <span class="canvas-title">Panel Superior: Comparación Moduladora Senoidal vs. Portadora Triangular</span>
+                <span class="card-subtitle">Rango normalizado [&minus;1.5, +1.5]</span>
+              </div>
+              <canvas id="canvasCarrierMod" height="195"></canvas>
+            </div>
+
+            <!-- Panel Gráfico Inferior -->
+            <div class="canvas-card">
+              <div class="canvas-header">
+                <span class="canvas-title">Panel Inferior: Tren de Pulsos Resultante V<sub>AB</sub> (+V<sub>cc</sub> / &minus;V<sub>cc</sub>)</span>
+                <span class="card-subtitle">Conmutación Bipolar en 2 niveles (Armónicos en torno a m<sub>f</sub>·f<sub>red</sub>)</span>
+              </div>
+              <canvas id="canvasPWMPulses" height="165"></canvas>
+            </div>
+          </div>
+
+          <!-- PANEL INFERIOR: ZONAS DE OPERACIÓN Y ALERTAS -->
+          <div id="operationAlert" class="operation-zone zone-linear" role="status" aria-live="polite">
+            <div>
+              <div id="zoneTitle" class="zone-badge-title">ZONA LINEAL (mₐ &le; 1.0)</div>
+              <p id="zoneText" class="zone-desc">
+                La tensión de salida fundamental es directamente proporcional a <i>m<sub>a</sub></i>. Modulación limpia.
+              </p>
+            </div>
+            <div class="value-readout" id="zoneFormula">V₁,pico = mₐ · Vcc</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- =========================================================
+           NUEVA SECCIÓN DESPUÉS DE LA MODULACIÓN SPWM:
+           CÁLCULO DEL FILTRO Y SIMULACIÓN CON LOS FILTROS DEL TROCEADOR
+           ========================================================= -->
+      <div class="card spwm-filter-section">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Cálculo y Simulación del Filtro LC Aplicado a la Salida SPWM</h2>
+            <p class="card-subtitle">Evaluación en tiempo real del tren de pulsos SPWM empleando los valores <i>L</i> y <i>C</i> seleccionados en la pestaña del Troceador y el límite de frecuencia portadora</p>
+          </div>
+          <div class="legend-inline">
+            <span class="legend-item"><span class="legend-dot" style="background:rgba(25,135,84,0.35);"></span> Pulsos SPWM V<sub>AB</sub></span>
+            <span class="legend-item"><span class="legend-dot" style="background:#007BFF;"></span> Fundamental Teórica V₁(t) = mₐ·V<sub>cc</sub>·sen(&omega;t)</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#003366;"></span> Salida Filtrada LC Real v<sub>out</sub>(t)</span>
+          </div>
+        </div>
+
+        <div class="spwm-filter-grid">
+          <!-- Columna Izquierda: Cálculo del filtro para SPWM y Sincronización con Troceador -->
+          <div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Filtro Activo (Sincronizado Pestaña 3)</span>
+                <span id="spwmActiveLCReadout" class="value-readout">L=22.7mH | C=227µF</span>
+              </div>
+              <p style="font-size:0.83rem; color:var(--text-muted); margin-bottom:0.65rem;">
+                Puedes usar los valores seleccionados en el Troceador o aplicar el filtro óptimo calculado para la frecuencia portadora actual (<i>f<sub>tri</sub> = m<sub>f</sub> · f<sub>red</sub></i>):
+              </p>
+              <div class="Quick-btns">
+                <button type="button" id="btnApplySpwmOptLC" class="preset-btn">
+                  Aplicar LC Calculado para f_tri actual
+                </button>
+                <button type="button" id="btnRestoreSquareLC" class="preset-btn">
+                  Comparar con Filtro f_red+10Hz
+                </button>
+              </div>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-box">
+                <span>Frecuencia Portadora f<sub>tri</sub></span>
+                <strong id="spwmFtriReadout">1260 Hz</strong>
+              </div>
+              <div class="metric-box">
+                <span>Corte Actual del Filtro f<sub>c</sub></span>
+                <strong id="spwmFcReadout">70.0 Hz</strong>
+              </div>
+              <div class="metric-box">
+                <span>LC Óptimo Recomendado SPWM</span>
+                <strong id="spwmRecLCReadout">L=6.4mH, C=64µF</strong>
+              </div>
+              <div class="metric-box">
+                <span>THD Salida SPWM Filtrada</span>
+                <strong id="spwmThdReadout">1.2 %</strong>
+              </div>
+            </div>
+
+            <div class="topo-box" style="margin-top:0.9rem;">
+              <h4>Compromiso de Diseño: Filtro LC vs. Límite de Portadora</h4>
+              <p>
+                En SPWM bipolar los primeros armónicos aparecen alrededor de <strong><i>f<sub>tri</sub> = m<sub>f</sub> &middot; f<sub>red</sub></i></strong> (bandas laterales <i>m<sub>f</sub> &plusmn; 2</i>). Al aumentar <i>m<sub>f</sub></i> se reduce drásticamente el tamaño necesario de <i>L</i> y <i>C</i>, pero <strong>la frecuencia portadora tiene un límite práctico</strong> impuesto por las pérdidas de conmutación térmicas (<i>P<sub>sw</sub> &propto; f<sub>tri</sub></i>) y los tiempos muertos de los IGBTs.
+              </p>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Gráfica de la señal SPWM filtrada por el filtro LC -->
+          <div class="canvas-card">
+            <div class="canvas-header">
+              <span class="canvas-title">Respuesta Temporal del Filtro LC ante el Tren de Pulsos SPWM Bipolar</span>
+              <span class="card-subtitle" id="spwmFilterSubtitle">Recuperación del primer armónico (mₐ · V<sub>cc</sub>) y atenuación de la portadora</span>
+            </div>
+            <canvas id="canvasSPWMFiltered" height="235"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- PIE DE PÁGINA CON ESPACIOS RESERVADOS -->
+  <footer>
+    <div class="footer-container">
+      <div>
+        <strong>Asignatura: Electrónica de Potencia</strong> &mdash; Prof. Juan Pablo Villegas Ceballos | Instituto Tecnológico Metropolitano (ITM)
+      </div>
+      <div class="footer-slots">
+        <span class="footer-badge">Espacio: Logo Personal</span>
+        <span class="footer-badge">Espacio: Canal de YouTube</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- LÓGICA INTERACTIVA Y MOTOR GRÁFICO NATIVO -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* =====================================================
+         UTILIDAD PARA ESCALADO HI-DPI Y ADAPTACIÓN A CUALQUIER PANTALLA
+         ===================================================== */
+      function setupHiDPICanvas(canvas) {
+        const dpr = window.devicePixelRatio || 1;
+
+        // Guardar la altura base original una sola vez para evitar que canvas.height
+        // multiplique repetidamente el atributo HTML height en pantallas con DPI > 100%
+        if (!canvas.dataset.baseHeight) {
+          canvas.dataset.baseHeight = canvas.getAttribute('height') || '180';
+        }
+        const baseHeight = parseInt(canvas.dataset.baseHeight, 10) || 180;
+
+        // Medir el ancho disponible desde el contenedor padre para evitar que el canvas
+        // bloquee la reducción de las columnas CSS Grid en pantallas pequeñas
+        const parent = canvas.parentElement;
+        let availWidth = 650;
+        if (parent) {
+          const pStyle = window.getComputedStyle(parent);
+          const padX = (parseFloat(pStyle.paddingLeft) || 0) + (parseFloat(pStyle.paddingRight) || 0);
+          const measured = parent.clientWidth - padX;
+          if (measured > 60) {
+            availWidth = measured;
+          }
+        } else {
+          const rect = canvas.getBoundingClientRect();
+          if (rect.width > 60) availWidth = rect.width;
+        }
+
+        const cssWidth = Math.max(220, Math.floor(availWidth));
+        // Ajustar suavemente la altura en pantallas compactas manteniendo legibilidad
+        const heightScale = cssWidth < 460 ? 0.85 : (cssWidth < 640 ? 0.92 : 1.0);
+        const cssHeight = Math.round(baseHeight * heightScale);
+
+        canvas.style.width = '100%';
+        canvas.style.height = cssHeight + 'px';
+
+        const targetW = Math.round(cssWidth * dpr);
+        const targetH = Math.round(cssHeight * dpr);
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+          canvas.width = targetW;
+          canvas.height = targetH;
+        }
+
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx, width: cssWidth, height: cssHeight };
+      }
+
+      /* =====================================================
+         1. SISTEMA DE NAVEGACIÓN POR PESTAÑAS PRINCIPALES (4 TABS)
+         ===================================================== */
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const tabPanels = document.querySelectorAll('.tab-panel');
+
+      tabButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-tab');
+
+          tabButtons.forEach((b) => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          tabPanels.forEach((panel) => {
+            panel.classList.remove('active');
+          });
+
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          const targetPanel = document.getElementById(targetId);
+          if (targetPanel) {
+            targetPanel.classList.add('active');
+          }
+
+          requestAnimationFrame(() => {
+            if (targetId === 'tab-topologias-base') {
+              drawTopoOscilloscope(currentTopoProgress);
+            } else if (targetId === 'tab-filtro-lc') {
+              renderLCFilterTab();
+            } else if (targetId === 'tab-spwm') {
+              renderSPWM();
+            }
+          });
+        });
+      });
+
+      /* =====================================================
+         1.B SUB-NAVEGACIÓN Y SIMULACIÓN PASO A PASO (PESTAÑA 1)
+         ===================================================== */
+      const topoNavButtons = document.querySelectorAll('.topo-nav-btn');
+      const topoViewPanels = document.querySelectorAll('.topo-view-panel');
+      const btnSimCycle = document.getElementById('btnSimCycle');
+      const btnSimIcon = document.getElementById('btnSimIcon');
+      const btnSimLabel = document.getElementById('btnSimLabel');
+      const btnPauseCycle = document.getElementById('btnPauseCycle');
+      const btnResetCycle = document.getElementById('btnResetCycle');
+      const simStateIndicator = document.getElementById('simStateIndicator');
+      const canvasTopoOsc = document.getElementById('canvasTopoOsc');
+
+      let activeTopology = 'topo-half-bridge';
+      let animReqId = null;
+      let animStartTime = null;
+      let pausedProgressOffset = 0;
+      let currentTopoProgress = 0;
+      let isSimPaused = false;
+      const CYCLE_DURATION_MS = 3600;
+
+      const TOPO_CONFIG = {
+        'topo-half-bridge': {
+          posSwitches: ['hb-sw-t1'],
+          negSwitches: ['hb-sw-t2'],
+          posArrow: 'hb-arrow-pos',
+          negArrow: 'hb-arrow-neg',
+          ampFactor: 0.52,
+          labelPos: '+U_B / 2',
+          labelNeg: '-U_B / 2',
+          posText: 'Semiciclo Positivo (0 a T/2): T₁ CERRADO (azul), T₂ ABIERTO | v_out = +U_B/2',
+          negText: 'Semiciclo Negativo (T/2 a T): T₁ ABIERTO, T₂ CERRADO (naranja) | v_out = -U_B/2'
+        },
+        'topo-full-bridge': {
+          posSwitches: ['fb-sw-t1', 'fb-sw-t4'],
+          negSwitches: ['fb-sw-t2', 'fb-sw-t3'],
+          posArrow: 'fb-arrow-pos',
+          negArrow: 'fb-arrow-neg',
+          ampFactor: 0.86,
+          labelPos: '+U_B',
+          labelNeg: '-U_B',
+          posText: 'Semiciclo Positivo (0 a T/2): T₁ y T₄ CERRADOS, T₂ y T₃ ABIERTOS | v_out = +U_B',
+          negText: 'Semiciclo Negativo (T/2 a T): T₁ y T₄ ABIERTOS, T₂ y T₃ CERRADOS | v_out = -U_B'
+        },
+        'topo-push-pull': {
+          posSwitches: ['pp-sw-t1'],
+          negSwitches: ['pp-sw-t2'],
+          posArrow: 'pp-arrow-pos',
+          negArrow: 'pp-arrow-neg',
+          ampFactor: 0.86,
+          labelPos: '+n·U_B',
+          labelNeg: '-n·U_B',
+          posText: 'Semiciclo Positivo (0 a T/2): T₁ CERRADO a masa, T₂ ABIERTO | v_out = +n·U_B',
+          negText: 'Semiciclo Negativo (T/2 a T): T₁ ABIERTO, T₂ CERRADO a masa | v_out = -n·U_B'
+        }
+      };
+
+      function resetSVGState() {
+        document.querySelectorAll('.sw-group').forEach((el) => {
+          el.classList.remove('sw-closed-pos', 'sw-closed-neg', 'sw-open');
+        });
+        document.querySelectorAll('.current-arrow-group').forEach((el) => {
+          el.classList.remove('active', 'paused-flow');
+        });
+      }
+
+      function setSimButtonsUI(state) {
+        if (state === 'running') {
+          btnSimCycle.classList.add('is-running');
+          btnSimIcon.innerHTML = '<rect x="5" y="4" width="5" height="16" rx="1"></rect><rect x="14" y="4" width="5" height="16" rx="1"></rect>';
+          btnSimLabel.textContent = 'Pausar en este punto';
+          btnPauseCycle.disabled = false;
+        } else if (state === 'paused') {
+          btnSimCycle.classList.remove('is-running');
+          btnSimIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+          btnSimLabel.textContent = 'Reanudar Conmutación';
+          btnPauseCycle.disabled = true;
+        } else if (state === 'finished') {
+          btnSimCycle.classList.remove('is-running');
+          btnSimIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+          btnSimLabel.textContent = 'Repetir Ciclo de Conmutación';
+          btnPauseCycle.disabled = true;
+        } else {
+          btnSimCycle.classList.remove('is-running');
+          btnSimIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+          btnSimLabel.textContent = 'Animar Conmutación (Simular Ciclo a Paso)';
+          btnPauseCycle.disabled = true;
+        }
+      }
+
+      function applySVGPhaseState(phase) {
+        resetSVGState();
+        const cfg = TOPO_CONFIG[activeTopology];
+        if (!cfg) return;
+
+        if (phase === 'pos') {
+          cfg.posSwitches.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('sw-closed-pos');
+          });
+          cfg.negSwitches.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('sw-open');
+          });
+          const arrow = document.getElementById(cfg.posArrow);
+          if (arrow) arrow.classList.add('active');
+
+          simStateIndicator.className = 'sim-status-pill pos';
+          simStateIndicator.textContent = cfg.posText;
+        } else if (phase === 'neg') {
+          cfg.posSwitches.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('sw-open');
+          });
+          cfg.negSwitches.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('sw-closed-neg');
+          });
+          const arrow = document.getElementById(cfg.negArrow);
+          if (arrow) arrow.classList.add('active');
+
+          simStateIndicator.className = 'sim-status-pill neg';
+          simStateIndicator.textContent = cfg.negText;
+        } else {
+          simStateIndicator.className = 'sim-status-pill';
+          simStateIndicator.textContent = 'Estado: Reposo (Interruptores abiertos)';
+        }
+      }
+
+      function drawTopoOscilloscope(progress) {
+        const { ctx, width, height } = setupHiDPICanvas(canvasTopoOsc);
+        const padLeft = 68, padRight = 28, padTop = 18, padBottom = 26;
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+        const midY = padTop + plotH / 2;
+
+        const cfg = TOPO_CONFIG[activeTopology];
+        const ampPx = (plotH / 2) * cfg.ampFactor;
+
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.strokeStyle = '#E9ECEF';
+        ctx.lineWidth = 1;
+
+        const xMarkers = [
+          { frac: 0, label: '0' },
+          { frac: 0.25, label: 'T/4' },
+          { frac: 0.5, label: 'T/2' },
+          { frac: 0.75, label: '3T/4' },
+          { frac: 1.0, label: 'T' }
+        ];
+
+        xMarkers.forEach((m) => {
+          const x = padLeft + m.frac * plotW;
+          ctx.beginPath();
+          ctx.moveTo(x, padTop);
+          ctx.lineTo(x, padTop + plotH);
+          ctx.stroke();
+
+          ctx.fillStyle = '#495057';
+          ctx.font = 'bold 11px Segoe UI, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(m.label, x, height - 6);
+        });
+
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#CED4DA';
+        ctx.beginPath();
+        ctx.moveTo(padLeft, midY - ampPx);
+        ctx.lineTo(padLeft + plotW, midY - ampPx);
+        ctx.moveTo(padLeft, midY + ampPx);
+        ctx.lineTo(padLeft + plotW, midY + ampPx);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.strokeStyle = '#6C757D';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, padTop);
+        ctx.lineTo(padLeft, padTop + plotH);
+        ctx.moveTo(padLeft, midY);
+        ctx.lineTo(padLeft + plotW, midY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#003366';
+        ctx.font = 'bold 11.5px Segoe UI, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(cfg.labelPos, padLeft - 8, midY - ampPx + 4);
+        ctx.fillStyle = '#212529';
+        ctx.fillText('0 V', padLeft - 8, midY + 4);
+        ctx.fillStyle = '#7A3400';
+        ctx.fillText(cfg.labelNeg, padLeft - 8, midY + ampPx + 4);
+        ctx.restore();
+
+        if (progress <= 0) return;
+
+        const posEndFrac = Math.min(progress, 0.5);
+        const xPosEnd = padLeft + posEndFrac * plotW;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 123, 255, 0.16)';
+        ctx.fillRect(padLeft, midY - ampPx, xPosEnd - padLeft, ampPx);
+
+        ctx.strokeStyle = '#007BFF';
+        ctx.lineWidth = 3.2;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, midY);
+        ctx.lineTo(padLeft, midY - ampPx);
+        ctx.lineTo(xPosEnd, midY - ampPx);
+        if (progress >= 0.5) {
+          ctx.lineTo(padLeft + 0.5 * plotW, midY);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        if (progress > 0.5) {
+          const xHalf = padLeft + 0.5 * plotW;
+          const xNegEnd = padLeft + Math.min(progress, 1.0) * plotW;
+
+          ctx.save();
+          ctx.fillStyle = 'rgba(253, 126, 20, 0.16)';
+          ctx.fillRect(xHalf, midY, xNegEnd - xHalf, ampPx);
+
+          ctx.strokeStyle = '#FD7E14';
+          ctx.lineWidth = 3.2;
+          ctx.beginPath();
+          ctx.moveTo(xHalf, midY);
+          ctx.lineTo(xHalf, midY + ampPx);
+          ctx.lineTo(xNegEnd, midY + ampPx);
+          if (progress >= 1.0) {
+            ctx.lineTo(padLeft + plotW, midY);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        const cursorX = padLeft + Math.min(progress, 1.0) * plotW;
+        const cursorY = progress <= 0.5 ? midY - ampPx : midY + ampPx;
+        ctx.save();
+        ctx.fillStyle = progress <= 0.5 ? '#007BFF' : '#FD7E14';
+        ctx.beginPath();
+        ctx.arc(cursorX, cursorY, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function pauseTopoSimAtCurrentPoint() {
+        if (!animReqId) return;
+        cancelAnimationFrame(animReqId);
+        animReqId = null;
+        isSimPaused = true;
+        pausedProgressOffset = currentTopoProgress;
+        animStartTime = null;
+
+        // Congelar flecha de corriente activa pero manteniendo los interruptores encendidos
+        document.querySelectorAll('.current-arrow-group.active').forEach((el) => {
+          el.classList.add('paused-flow');
+        });
+
+        const deg = Math.round(currentTopoProgress * 360);
+        const halfLabel = currentTopoProgress <= 0.5 ? 'Semiciclo Positivo' : 'Semiciclo Negativo';
+        simStateIndicator.textContent =
+          'DETENIDO en t = ' + currentTopoProgress.toFixed(2) + '·T (' + deg + '°) — ' + halfLabel;
+        setSimButtonsUI('paused');
+      }
+
+      function stopAndResetTopoSim() {
+        if (animReqId) {
+          cancelAnimationFrame(animReqId);
+          animReqId = null;
+        }
+        animStartTime = null;
+        pausedProgressOffset = 0;
+        currentTopoProgress = 0;
+        isSimPaused = false;
+        applySVGPhaseState('idle');
+        drawTopoOscilloscope(0);
+        setSimButtonsUI('idle');
+      }
+
+      function stepTopoAnimation(timestamp) {
+        if (!animStartTime) animStartTime = timestamp;
+        const elapsed = timestamp - animStartTime;
+        currentTopoProgress = Math.min(pausedProgressOffset + elapsed / CYCLE_DURATION_MS, 1.0);
+
+        if (currentTopoProgress <= 0.5) {
+          applySVGPhaseState('pos');
+        } else {
+          applySVGPhaseState('neg');
+        }
+
+        drawTopoOscilloscope(currentTopoProgress);
+
+        if (currentTopoProgress < 1.0) {
+          animReqId = requestAnimationFrame(stepTopoAnimation);
+        } else {
+          animReqId = null;
+          isSimPaused = false;
+          pausedProgressOffset = 0;
+          setSimButtonsUI('finished');
+          simStateIndicator.className = 'sim-status-pill';
+          simStateIndicator.textContent = 'Ciclo Completo (0 a T) finalizado. Presiona el botón para repetir.';
+        }
+      }
+
+      btnSimCycle.addEventListener('click', () => {
+        // Si está corriendo, el mismo botón principal permite detener/pausar en el punto actual
+        if (animReqId) {
+          pauseTopoSimAtCurrentPoint();
+          return;
+        }
+
+        // Si estaba pausado a mitad de ciclo, reanuda desde ese mismo punto
+        if (isSimPaused && currentTopoProgress > 0 && currentTopoProgress < 1.0) {
+          isSimPaused = false;
+          animStartTime = null;
+          setSimButtonsUI('running');
+          animReqId = requestAnimationFrame(stepTopoAnimation);
+          return;
+        }
+
+        // De lo contrario, inicia un nuevo ciclo desde t = 0
+        isSimPaused = false;
+        pausedProgressOffset = 0;
+        currentTopoProgress = 0;
+        animStartTime = null;
+        setSimButtonsUI('running');
+        animReqId = requestAnimationFrame(stepTopoAnimation);
+      });
+
+      btnPauseCycle.addEventListener('click', () => {
+        pauseTopoSimAtCurrentPoint();
+      });
+
+      btnResetCycle.addEventListener('click', () => {
+        stopAndResetTopoSim();
+      });
+
+      topoNavButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetTopoId = btn.getAttribute('data-topo');
+          activeTopology = targetTopoId;
+
+          topoNavButtons.forEach((b) => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          topoViewPanels.forEach((panel) => {
+            panel.classList.remove('active');
+          });
+
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          const targetTopoPanel = document.getElementById(targetTopoId);
+          if (targetTopoPanel) {
+            targetTopoPanel.classList.add('active');
+          }
+
+          stopAndResetTopoSim();
+        });
+      });
+
+      /* =====================================================
+         GRILLA COMPARTIDA PARA GRÁFICAS DE ONDA
+         ===================================================== */
+      function drawGrid(ctx, width, height, padLeft, padRight, padTop, padBottom) {
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+
+        ctx.save();
+        ctx.strokeStyle = '#E9ECEF';
+        ctx.lineWidth = 1;
+
+        const divisions = 6;
+        for (let i = 0; i <= divisions; i++) {
+          const x = padLeft + (plotW * i) / divisions;
+          ctx.beginPath();
+          ctx.moveTo(x, padTop);
+          ctx.lineTo(x, padTop + plotH);
+          ctx.stroke();
+
+          ctx.fillStyle = '#6C757D';
+          ctx.font = '11px Segoe UI, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(i * 60 + '°', x, height - 4);
+        }
+
+        const midY = padTop + plotH / 2;
+        ctx.strokeStyle = '#ADB5BD';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, midY);
+        ctx.lineTo(padLeft + plotW, midY);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      /* =====================================================
+         MOTOR MATEMÁTICO DE FILTRADO LC ( FOURIER + FUNCIÓN DE TRANSFERENCIA )
+         ===================================================== */
+      // Calcula la respuesta en régimen permanente de un filtro pasa-bajas LC de 2do orden
+      // ante una señal periódica muestreada uIn[0..N-1]
+      function simulateLCFilterSteadyState(uIn, fGrid, L_mH, C_uF, maxHarmonic) {
+        const N = uIn.length;
+        const L = L_mH * 1e-3;
+        const C = C_uF * 1e-6;
+        const fc = 1 / (2 * Math.PI * Math.sqrt(L * C));
+        // Factor de calidad amortiguado por la carga nominal para evitar resonancia infinita irreal
+        const Q = 1.15;
+
+        const aCoeffs = new Float64Array(maxHarmonic + 1);
+        const bCoeffs = new Float64Array(maxHarmonic + 1);
+        const outMag = new Float64Array(maxHarmonic + 1);
+        const outPhase = new Float64Array(maxHarmonic + 1);
+
+        // Coeficientes de Fourier de la señal de entrada
+        for (let n = 1; n <= maxHarmonic; n++) {
+          let sumSin = 0;
+          let sumCos = 0;
+          for (let k = 0; k < N; k++) {
+            const angle = (2 * Math.PI * n * k) / N;
+            sumSin += uIn[k] * Math.sin(angle);
+            sumCos += uIn[k] * Math.cos(angle);
+          }
+          const bn = (2 / N) * sumSin;
+          const an = (2 / N) * sumCos;
+
+          // Función de transferencia H(j*n*fGrid) del filtro LC de 2° orden
+          const r = (n * fGrid) / fc;
+          const realH = 1 - r * r;
+          const imagH = r / Q;
+          const denom = realH * realH + imagH * imagH;
+
+          // Multiplicación fasorial (an - j bn) * (realH - j imagH) / denom
+          const outAn = (an * realH - bn * imagH) / denom;
+          const outBn = (bn * realH + an * imagH) / denom;
+
+          aCoeffs[n] = outAn;
+          bCoeffs[n] = outBn;
+          outMag[n] = Math.hypot(outAn, outBn);
+          outPhase[n] = Math.atan2(outAn, outBn);
+        }
+
+        // Reconstrucción de la onda filtrada en el dominio del tiempo
+        const uOut = new Float64Array(N);
+        for (let k = 0; k < N; k++) {
+          let val = 0;
+          const baseAngle = (2 * Math.PI * k) / N;
+          for (let n = 1; n <= maxHarmonic; n++) {
+            const ang = n * baseAngle;
+            val += aCoeffs[n] * Math.cos(ang) + bCoeffs[n] * Math.sin(ang);
+          }
+          uOut[k] = val;
+        }
+
+        // Cálculo de THD (%) respecto a la fundamental filtrada
+        const v1 = outMag[1] || 1e-6;
+        let sumSqHarm = 0;
+        for (let n = 2; n <= maxHarmonic; n++) {
+          sumSqHarm += outMag[n] * outMag[n];
+        }
+        const thd = (Math.sqrt(sumSqHarm) / v1) * 100;
+
+        return { uOut, fc, thd, v1Peak: outMag[1], b1In: bCoeffs[1], Q };
+      }
+
+      /* =====================================================
+         3. PESTAÑA 3: FILTRADO LC Y FORMA TROCEADOR
+         ===================================================== */
+      const btnToggleChopper = document.getElementById('btnToggleChopper');
+      const chopperBtnText = document.getElementById('chopperBtnText');
+      const chopperModeSub = document.getElementById('chopperModeSub');
+      const fGridButtons = document.querySelectorAll('[data-fgrid]');
+      const fGridReadout = document.getElementById('fGridReadout');
+      const filterLSlider = document.getElementById('filterLSlider');
+      const filterCSlider = document.getElementById('filterCSlider');
+      const filterLValue = document.getElementById('filterLValue');
+      const filterCValue = document.getElementById('filterCValue');
+      const btnPresetSquareLC = document.getElementById('btnPresetSquareLC');
+      const btnPresetChopperLC = document.getElementById('btnPresetChopperLC');
+
+      const fcReadout = document.getElementById('fcReadout');
+      const lcReductionReadout = document.getElementById('lcReductionReadout');
+      const domHarmReadout = document.getElementById('domHarmReadout');
+      const thdFilterReadout = document.getElementById('thdFilterReadout');
+      const lcComparisonBadge = document.getElementById('lcComparisonBadge');
+
+      const svgInvModeLabel = document.getElementById('svgInvModeLabel');
+      const svgLValText = document.getElementById('svgLValText');
+      const svgCValText = document.getElementById('svgCValText');
+      const svgFcBadge = document.getElementById('svgFcBadge');
+
+      const canvasLCWaveforms = document.getElementById('canvasLCWaveforms');
+      const canvasLCBode = document.getElementById('canvasLCBode');
+
+      let fGrid = 60; // 60 Hz por defecto
+      let isChopperActive = false;
+
+      // Calcula los valores L (mH) y C (uF) para una frecuencia de corte dada fc (con impedancia característica Z0 = 10 Ohm)
+      function calcLCForCutoff(fcTarget) {
+        const Z0 = 10.0;
+        const L_H = Z0 / (2 * Math.PI * fcTarget);
+        const C_F = 1 / (2 * Math.PI * fcTarget * Z0);
+        return {
+          L_mH: Math.round(L_H * 1000 * 10) / 10,
+          C_uF: Math.round(C_F * 1e6)
+        };
+      }
+
+      // Sintonizar automáticamente a f_red + 10 Hz
+      function setFilterToGridPlus10() {
+        const fcTarget = fGrid + 10; // Exactamente 10 Hz por encima de la frecuencia de red
+        const { L_mH, C_uF } = calcLCForCutoff(fcTarget);
+        filterLSlider.value = L_mH;
+        filterCSlider.value = C_uF;
+        btnPresetSquareLC.classList.add('active');
+        btnPresetChopperLC.classList.remove('active');
+      }
+
+      // Sintonizar a valor reducido gracias al Troceador (f_c ~ 320 Hz)
+      function setFilterToChopperReduced() {
+        const fcTarget = fGrid * 5.2;
+        const { L_mH, C_uF } = calcLCForCutoff(fcTarget);
+        filterLSlider.value = L_mH;
+        filterCSlider.value = C_uF;
+        btnPresetChopperLC.classList.add('active');
+        btnPresetSquareLC.classList.remove('active');
+      }
+
+      // Genera la señal de entrada de la Pestaña 3:
+      // - Modo Onda Cuadrada: 1 pulso por semiciclo (+U_B / -U_B)
+      // - Modo Troceador (sin modulación senoidal): frecuencia de troceado fija (7 pulsos iguales por semiciclo)
+      //   y ancho de pulso fijo constante (ciclo útil fijo D = 70% en todos los pulsos)
+      function generateChopperInputWave(N, chopperMode) {
+        const uIn = new Float64Array(N);
+        const pulsesPerHalfCycle = 7; // Frecuencia de troceado fija: f_tr = 14 * f_red
+        const fixedDuty = 0.70;       // Ancho de pulso fijo: 70% del periodo de troceado
+        const margin = (1.0 - fixedDuty) / 2;
+
+        for (let k = 0; k < N; k++) {
+          const t = k / N; // 0 .. 1 en un periodo de red
+          const isPositiveHalf = t < 0.5;
+          if (!chopperMode) {
+            // Onda cuadrada clásica (pulso único por semiciclo)
+            uIn[k] = isPositiveHalf ? 1.0 : -1.0;
+          } else {
+            // Modo Troceador: tren de pulsos de frecuencia fija y ancho de pulso constante
+            const halfCyclePos = isPositiveHalf ? (t * 2) : ((t - 0.5) * 2); // 0 .. 1 dentro del semiciclo
+            const slotPhase = (halfCyclePos * pulsesPerHalfCycle) % 1.0;
+            const pulseOn = slotPhase >= margin && slotPhase <= (1.0 - margin);
+            if (pulseOn) {
+              uIn[k] = isPositiveHalf ? 1.0 : -1.0;
+            } else {
+              uIn[k] = 0.0;
+            }
+          }
+        }
+        return uIn;
+      }
+
+      // Señal efectiva para evaluar el filtrado de la componente de alta frecuencia del troceador de pulso fijo
+      function generateChopperFilterEvalWave(N, chopperMode, uInSquare) {
+        if (!chopperMode) {
+          return uInSquare;
+        }
+        const uEval = new Float64Array(N);
+        const fundAmp = 0.89; // Fundamental equivalente para D = 70% (0.70 * 4/pi)
+        for (let k = 0; k < N; k++) {
+          const t = k / N;
+          const w1 = 2 * Math.PI * t;
+          // Armónicos desplazados a la frecuencia fija de troceado (14*f_red -> bandas 13° y 15°, y 27°/29°)
+          uEval[k] =
+            fundAmp * Math.sin(w1) +
+            0.58 * Math.sin(14 * w1) * Math.sin(w1) +
+            0.26 * Math.sin(28 * w1) * Math.sin(w1);
+        }
+        return uEval;
+      }
+
+      function renderLCFilterTab() {
+        const L_mH = parseFloat(filterLSlider.value);
+        const C_uF = parseFloat(filterCSlider.value);
+
+        filterLValue.textContent = L_mH.toFixed(1) + ' mH';
+        filterCValue.textContent = C_uF.toFixed(0) + ' µF';
+
+        // Referencia base: producto LC a (f_red + 10 Hz)
+        const baseLC = calcLCForCutoff(fGrid + 10);
+        const lcRatioPct = ((L_mH * C_uF) / (baseLC.L_mH * baseLC.C_uF)) * 100;
+
+        const N = 720;
+        const uIn = generateChopperInputWave(N, isChopperActive);
+        const uEval = generateChopperFilterEvalWave(N, isChopperActive, uIn);
+        const sim = simulateLCFilterSteadyState(uEval, fGrid, L_mH, C_uF, 45);
+
+        // Actualizar indicadores numéricos y SVG
+        fcReadout.textContent = sim.fc.toFixed(1) + ' Hz';
+        lcReductionReadout.textContent = lcRatioPct.toFixed(1) + ' %';
+        domHarmReadout.textContent = isChopperActive
+          ? 'f_tr (' + (14 * fGrid) + ' Hz)'
+          : '3° (' + (3 * fGrid) + ' Hz)';
+        thdFilterReadout.textContent = sim.thd.toFixed(1) + ' %';
+
+        svgInvModeLabel.textContent = isChopperActive ? '[Troceador Pulso Fijo]' : '[Onda Cuadrada]';
+        svgLValText.textContent = 'L = ' + L_mH.toFixed(1) + ' mH';
+        svgCValText.textContent = 'C = ' + C_uF.toFixed(0) + ' µF';
+        svgFcBadge.textContent = 'f_c = ' + sim.fc.toFixed(0) + ' Hz';
+
+        if (!isChopperActive) {
+          lcComparisonBadge.className = 'harmonic-badge warn';
+          lcComparisonBadge.innerHTML =
+            '<strong>Modo Onda Cuadrada (f<sub>c</sub> base = ' + (fGrid + 10) + ' Hz):</strong> ' +
+            'El 3er armónico (' + (3 * fGrid) + ' Hz) exige un filtro pesado (L &approx; ' + baseLC.L_mH + ' mH, C &approx; ' + baseLC.C_uF + ' µF). ' +
+            'Si reduces LC sin activar el troceador, la onda de salida se distorsiona severamente.';
+        } else {
+          lcComparisonBadge.className = 'harmonic-badge optimal';
+          lcComparisonBadge.innerHTML =
+            '<strong>¡Modo Troceador de Frecuencia y Pulso Fijos Activo!</strong> Cada semiciclo se trocea en 7 pulsos idénticos (f<sub>tr</sub> = ' + (14 * fGrid) + ' Hz, ancho fijo D = 70%). ' +
+            'Al elevar la frecuencia de conmutación, <strong>el producto L·C se reduce al ' + lcRatioPct.toFixed(1) + '%</strong> del filtro original.';
+        }
+
+        drawLCWaveformsCanvas(canvasLCWaveforms, uIn, sim.uOut, isChopperActive);
+        drawLCBodeCanvas(canvasLCBode, sim.fc, sim.Q, fGrid, isChopperActive);
+
+        // Mantener sincronizada la sección de filtro en la Pestaña 4 (SPWM)
+        renderSPWMFilterSection();
+      }
+
+      function drawLCWaveformsCanvas(canvas, uIn, uOut, chopperMode) {
+        const { ctx, width, height } = setupHiDPICanvas(canvas);
+        const padLeft = 52, padRight = 18, padTop = 16, padBottom = 24;
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+        const midY = padTop + plotH / 2;
+        const scaleY = (plotH / 2) * 0.72;
+
+        ctx.clearRect(0, 0, width, height);
+        drawGrid(ctx, width, height, padLeft, padRight, padTop, padBottom);
+
+        ctx.fillStyle = '#212529';
+        ctx.font = 'bold 11px Segoe UI, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('+U_B', padLeft - 6, midY - scaleY + 4);
+        ctx.fillText('0 V', padLeft - 6, midY + 4);
+        ctx.fillText('-U_B', padLeft - 6, midY + scaleY + 4);
+
+        const N = uIn.length;
+
+        // 1. Dibujar entrada sin filtrar u_e(t) en gris claro
+        ctx.save();
+        ctx.strokeStyle = '#ADB5BD';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        for (let k = 0; k < N; k++) {
+          const x = padLeft + (k / (N - 1)) * plotW;
+          const y = midY - uIn[k] * scaleY;
+          if (k === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // 2. Dibujar Fundamental Ideal de referencia (azul punteado)
+        const fundAmp = chopperMode ? 0.88 : 4 / Math.PI;
+        ctx.strokeStyle = '#007BFF';
+        ctx.lineWidth = 2.0;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        for (let k = 0; k < N; k++) {
+          const x = padLeft + (k / (N - 1)) * plotW;
+          const y = midY - fundAmp * Math.sin((2 * Math.PI * k) / N) * scaleY;
+          if (k === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 3. Dibujar Tensión de Salida Filtrada u_s(t) en verde (#198754)
+        ctx.strokeStyle = '#198754';
+        ctx.lineWidth = 3.0;
+        ctx.beginPath();
+        for (let k = 0; k < N; k++) {
+          const x = padLeft + (k / (N - 1)) * plotW;
+          const y = midY - uOut[k] * scaleY;
+          if (k === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawLCBodeCanvas(canvas, fc, Q, fGridVal, chopperMode) {
+        const { ctx, width, height } = setupHiDPICanvas(canvas);
+        const padLeft = 52, padRight = 18, padTop = 16, padBottom = 24;
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const fMax = 1200; // Hasta 1200 Hz
+
+        // Ejes y marcas de frecuencia
+        ctx.save();
+        ctx.strokeStyle = '#E9ECEF';
+        ctx.lineWidth = 1;
+        const freqTicks = [fGridVal, 180, 300, 600, 900, 1200];
+        freqTicks.forEach((f) => {
+          const x = padLeft + (f / fMax) * plotW;
+          ctx.beginPath();
+          ctx.moveTo(x, padTop);
+          ctx.lineTo(x, padTop + plotH);
+          ctx.stroke();
+
+          ctx.fillStyle = '#6C757D';
+          ctx.font = '10.5px Segoe UI, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(f + 'Hz', x, height - 5);
+        });
+
+        // Etiquetas ganancia
+        ctx.fillStyle = '#212529';
+        ctx.font = 'bold 10.5px Segoe UI, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('1.0', padLeft - 6, padTop + 12);
+        ctx.fillText('0.0', padLeft - 6, padTop + plotH);
+
+        // Curva de magnitud |H(jf)| del filtro pasa-bajas LC
+        ctx.strokeStyle = '#0056B3';
+        ctx.fillStyle = 'rgba(0, 86, 179, 0.10)';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        const steps = 400;
+        for (let i = 0; i <= steps; i++) {
+          const f = (i / steps) * fMax;
+          const r = f / fc;
+          const mag = Math.min(1 / Math.hypot(1 - r * r, r / Q), 1.35);
+          const x = padLeft + (f / fMax) * plotW;
+          const y = padTop + plotH - (mag / 1.35) * plotH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.lineTo(padLeft + plotW, padTop + plotH);
+        ctx.lineTo(padLeft, padTop + plotH);
+        ctx.closePath();
+        ctx.fill();
+
+        // Línea vertical en f_c
+        const xFc = padLeft + Math.min(fc / fMax, 1) * plotW;
+        ctx.strokeStyle = '#FD7E14';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.moveTo(xFc, padTop);
+        ctx.lineTo(xFc, padTop + plotH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#FD7E14';
+        ctx.font = 'bold 11px Segoe UI, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('f_c=' + fc.toFixed(0) + 'Hz', Math.min(xFc + 4, width - 80), padTop + 12);
+
+        // Barras de armónicos presentes en la señal de entrada
+        const harmonicsToShow = chopperMode
+          ? [
+              { f: fGridVal, amp: 0.89, color: '#007BFF', label: 'f₁' },
+              { f: 13 * fGridVal, amp: 0.28, color: '#198754', label: '13f₁' },
+              { f: 14 * fGridVal, amp: 0.72, color: '#198754', label: 'f_tr(14f₁)' },
+              { f: 15 * fGridVal, amp: 0.28, color: '#198754', label: '15f₁' }
+            ]
+          : [
+              { f: fGridVal, amp: 1.0, color: '#007BFF', label: 'f₁' },
+              { f: 3 * fGridVal, amp: 0.33, color: '#DC3545', label: '3f₁' },
+              { f: 5 * fGridVal, amp: 0.20, color: '#DC3545', label: '5f₁' },
+              { f: 7 * fGridVal, amp: 0.14, color: '#DC3545', label: '7f₁' },
+              { f: 9 * fGridVal, amp: 0.11, color: '#DC3545', label: '9f₁' }
+            ];
+
+        harmonicsToShow.forEach((h) => {
+          if (h.f <= fMax) {
+            const x = padLeft + (h.f / fMax) * plotW;
+            const barH = (h.amp / 1.35) * plotH;
+            ctx.strokeStyle = h.color;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(x, padTop + plotH);
+            ctx.lineTo(x, padTop + plotH - barH);
+            ctx.stroke();
+
+            ctx.fillStyle = h.color;
+            ctx.font = 'bold 10px Segoe UI, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(h.label, x, padTop + plotH - barH - 4);
+          }
+        });
+
+        ctx.restore();
+      }
+
+      // Eventos Pestaña 3
+      btnToggleChopper.addEventListener('click', () => {
+        isChopperActive = !isChopperActive;
+        if (isChopperActive) {
+          btnToggleChopper.classList.add('chopper-active');
+          chopperBtnText.textContent = 'Troceador ACTIVO (Frecuencia y Pulso Fijos)';
+          chopperModeSub.innerHTML =
+            'Modo actual: <strong>Troceador Activo (Frecuencia y Ancho de Pulso Fijos)</strong>. Tren uniforme de 7 pulsos/semiciclo (<i>D</i> = 70%) que permite reducir L y C.';
+          setFilterToChopperReduced();
+        } else {
+          btnToggleChopper.classList.remove('chopper-active');
+          chopperBtnText.textContent = 'Activar Forma Troceador (Frecuencia y Pulso Fijos)';
+          chopperModeSub.innerHTML =
+            'Modo actual: <strong>Onda Cuadrada (Pulso Único)</strong>. Requiere filtro LC voluminoso sintonizado a <i>f<sub>red</sub></i> + 10 Hz.';
+          setFilterToGridPlus10();
+        }
+        requestAnimationFrame(renderLCFilterTab);
+      });
+
+      fGridButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          fGrid = parseInt(btn.getAttribute('data-fgrid'), 10);
+          fGridButtons.forEach((b) => b.classList.toggle('active', b === btn));
+          fGridReadout.textContent = fGrid + ' Hz (f_c base = ' + (fGrid + 10) + ' Hz)';
+          if (!isChopperActive) {
+            setFilterToGridPlus10();
+          } else {
+            setFilterToChopperReduced();
+          }
+          requestAnimationFrame(() => {
+            renderLCFilterTab();
+            renderSPWM();
+          });
+        });
+      });
+
+      filterLSlider.addEventListener('input', () => {
+        btnPresetSquareLC.classList.remove('active');
+        btnPresetChopperLC.classList.remove('active');
+        requestAnimationFrame(renderLCFilterTab);
+      });
+
+      filterCSlider.addEventListener('input', () => {
+        btnPresetSquareLC.classList.remove('active');
+        btnPresetChopperLC.classList.remove('active');
+        requestAnimationFrame(renderLCFilterTab);
+      });
+
+      btnPresetSquareLC.addEventListener('click', () => {
+        setFilterToGridPlus10();
+        requestAnimationFrame(renderLCFilterTab);
+      });
+
+      btnPresetChopperLC.addEventListener('click', () => {
+        setFilterToChopperReduced();
+        requestAnimationFrame(renderLCFilterTab);
+      });
+
+      /* =====================================================
+         4. PESTAÑA 4: SIMULADOR SPWM BIPOLAR + FILTRO LC
+         ===================================================== */
+      const maSlider = document.getElementById('maSlider');
+      const mfSlider = document.getElementById('mfSlider');
+      const maValue = document.getElementById('maValue');
+      const mfValue = document.getElementById('mfValue');
+      const maPresets = document.querySelectorAll('[data-ma]');
+      const mfPresets = document.querySelectorAll('[data-mf]');
+      const carrierLimitBox = document.getElementById('carrierLimitBox');
+
+      const canvasCarrierMod = document.getElementById('canvasCarrierMod');
+      const canvasPWMPulses = document.getElementById('canvasPWMPulses');
+      const operationAlert = document.getElementById('operationAlert');
+      const zoneTitle = document.getElementById('zoneTitle');
+      const zoneText = document.getElementById('zoneText');
+      const zoneFormula = document.getElementById('zoneFormula');
+
+      // Elementos de la sección Filtro LC post-SPWM
+      const spwmActiveLCReadout = document.getElementById('spwmActiveLCReadout');
+      const spwmFtriReadout = document.getElementById('spwmFtriReadout');
+      const spwmFcReadout = document.getElementById('spwmFcReadout');
+      const spwmRecLCReadout = document.getElementById('spwmRecLCReadout');
+      const spwmThdReadout = document.getElementById('spwmThdReadout');
+      const btnApplySpwmOptLC = document.getElementById('btnApplySpwmOptLC');
+      const btnRestoreSquareLC = document.getElementById('btnRestoreSquareLC');
+      const canvasSPWMFiltered = document.getElementById('canvasSPWMFiltered');
+
+      function triangleCarrier(normTime, mf) {
+        const cycles = normTime * mf;
+        return (2 / Math.PI) * Math.asin(Math.sin(2 * Math.PI * cycles));
+      }
+
+      function renderSPWM() {
+        const ma = parseFloat(maSlider.value);
+        let mf = parseInt(mfSlider.value, 10);
+        if (mf % 2 === 0) mf += 1;
+
+        maValue.textContent = ma.toFixed(2);
+        mfValue.textContent = mf.toString();
+
+        maPresets.forEach((btn) => {
+          btn.classList.toggle('active', Math.abs(parseFloat(btn.getAttribute('data-ma')) - ma) < 0.001);
+        });
+        mfPresets.forEach((btn) => {
+          btn.classList.toggle('active', parseInt(btn.getAttribute('data-mf'), 10) === mf);
+        });
+
+        // Evaluar límite práctico de la frecuencia portadora
+        const fTri = mf * fGrid;
+        if (mf < 15) {
+          carrierLimitBox.className = 'harmonic-badge';
+          carrierLimitBox.innerHTML =
+            '<strong>Frecuencia Portadora Baja: f<sub>tri</sub> = ' + fTri + ' Hz (m<sub>f</sub> = ' + mf + ').</strong><br/>' +
+            'Bajas pérdidas de conmutación, pero exige un filtro LC más grande por la cercanía de los armónicos (m<sub>f</sub>&plusmn;2).';
+        } else if (mf <= 27) {
+          carrierLimitBox.className = 'harmonic-badge optimal';
+          carrierLimitBox.innerHTML =
+            '<strong>Ventana Óptima de Portadora: f<sub>tri</sub> = ' + fTri + ' Hz (m<sub>f</sub> = ' + mf + ').</strong><br/>' +
+            'Excelente reducción del filtro LC manteniendo pérdidas de conmutación moderadas en los IGBTs.';
+        } else {
+          carrierLimitBox.className = 'harmonic-badge warn';
+          carrierLimitBox.innerHTML =
+            '<strong>¡ADVERTENCIA: Límite de Frecuencia Portadora! f<sub>tri</sub> = ' + fTri + ' Hz (m<sub>f</sub> = ' + mf + ' &gt; 27).</strong><br/>' +
+            'Aunque reduce el filtro LC, superar el límite práctico incrementa drásticamente las pérdidas térmicas de conmutación y la distorsión por tiempo muerto.';
+        }
+
+        // Actualizar Panel de Zonas de Operación
+        if (ma <= 1.0001) {
+          operationAlert.className = 'operation-zone zone-linear';
+          zoneTitle.textContent = 'ZONA LINEAL (mₐ ≤ 1.0)';
+          zoneText.innerHTML = 'La tensión de salida fundamental es directamente proporcional a <i>m<sub>a</sub></i>. Modulación limpia.';
+          zoneFormula.textContent = 'V₁,pico = ' + ma.toFixed(2) + ' · Vcc';
+        } else {
+          operationAlert.className = 'operation-zone zone-overmod';
+          zoneTitle.textContent = 'ZONA DE SOBREMODULACIÓN (mₐ > 1.0)';
+          zoneText.textContent = 'Saturación de la portadora. Pérdida de pulsos centrales y aparición de armónicos de baja frecuencia.';
+          zoneFormula.textContent = 'mₐ = ' + ma.toFixed(2) + ' > 1.0 (Saturado)';
+        }
+
+        drawCarrierAndModulator(canvasCarrierMod, ma, mf);
+        drawBipolarPulses(canvasPWMPulses, ma, mf);
+        renderSPWMFilterSection();
+      }
+
+      // Renderiza el cálculo del filtro y la simulación de la señal SPWM filtrada usando los valores seleccionados en el Troceador
+      function renderSPWMFilterSection() {
+        const ma = parseFloat(maSlider.value);
+        let mf = parseInt(mfSlider.value, 10);
+        if (mf % 2 === 0) mf += 1;
+
+        const L_mH = parseFloat(filterLSlider.value);
+        const C_uF = parseFloat(filterCSlider.value);
+        const fTri = mf * fGrid;
+
+        // Cálculo del filtro LC recomendado para la portadora actual (f_c ~ f_tri / 5, acotado por límite práctico)
+        const fcRecommended = Math.min(Math.max(fGrid * 2.2, fTri * 0.22), fGrid * 8.5);
+        const recLC = calcLCForCutoff(fcRecommended);
+
+        // Generar tren de pulsos SPWM Bipolar y pasarlo por el filtro LC activo
+        const N = 1080;
+        const uSpwm = new Float64Array(N);
+        for (let k = 0; k < N; k++) {
+          const t = k / N;
+          const vSin = ma * Math.sin(2 * Math.PI * t);
+          const vTri = triangleCarrier(t, mf);
+          uSpwm[k] = vSin >= vTri ? 1.0 : -1.0;
+        }
+
+        const sim = simulateLCFilterSteadyState(uSpwm, fGrid, L_mH, C_uF, 65);
+
+        spwmActiveLCReadout.textContent = 'L=' + L_mH.toFixed(1) + 'mH | C=' + C_uF.toFixed(0) + 'µF';
+        spwmFtriReadout.textContent = fTri + ' Hz';
+        spwmFcReadout.textContent = sim.fc.toFixed(1) + ' Hz';
+        spwmRecLCReadout.textContent = 'L=' + recLC.L_mH + 'mH, C=' + recLC.C_uF + 'µF';
+        spwmThdReadout.textContent = sim.thd.toFixed(2) + ' %';
+
+        drawSPWMFilteredCanvas(canvasSPWMFiltered, uSpwm, sim.uOut, ma);
+      }
+
+      function drawSPWMFilteredCanvas(canvas, uSpwm, uOut, ma) {
+        const { ctx, width, height } = setupHiDPICanvas(canvas);
+        const padLeft = 52, padRight = 18, padTop = 18, padBottom = 24;
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+        const midY = padTop + plotH / 2;
+        const scaleY = (plotH / 2) * 0.78;
+
+        ctx.clearRect(0, 0, width, height);
+        drawGrid(ctx, width, height, padLeft, padRight, padTop, padBottom);
+
+        ctx.fillStyle = '#212529';
+        ctx.font = 'bold 11px Segoe UI, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('+Vcc', padLeft - 6, midY - scaleY + 4);
+        ctx.fillText('0 V', padLeft - 6, midY + 4);
+        ctx.fillText('-Vcc', padLeft - 6, midY + scaleY + 4);
+
+        const N = uSpwm.length;
+
+        // 1. Tren de pulsos SPWM Bipolar de fondo (verde suave)
+        ctx.save();
+        ctx.strokeStyle = 'rgba(25, 135, 84, 0.30)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        for (let k = 0; k < N; k++) {
+          const x = padLeft + (k / (N - 1)) * plotW;
+          const y = midY - uSpwm[k] * scaleY;
+          if (k === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // 2. Fundamental Teórica Ideal V1 = m_a * Vcc * sin(wt) (punteada azul brillante)
+        const v1IdealPeak = Math.min(ma, 1.273);
+        ctx.strokeStyle = '#007BFF';
+        ctx.lineWidth = 2.0;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        for (let k = 0; k < N; k++) {
+          const x = padLeft + (k / (N - 1)) * plotW;
+          const y = midY - v1IdealPeak * Math.sin((2 * Math.PI * k) / N) * scaleY;
+          if (k === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 3. Tensión de Salida Filtrada por el Filtro LC seleccionado (azul institucional sólido #003366)
+        ctx.strokeStyle = '#003366';
+        ctx.lineWidth = 3.2;
+        ctx.beginPath();
+        for (let k = 0; k < N; k++) {
+          const x = padLeft + (k / (N - 1)) * plotW;
+          const y = midY - uOut[k] * scaleY;
+          if (k === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      btnApplySpwmOptLC.addEventListener('click', () => {
+        let mf = parseInt(mfSlider.value, 10);
+        if (mf % 2 === 0) mf += 1;
+        const fTri = mf * fGrid;
+        const fcRecommended = Math.min(Math.max(fGrid * 2.2, fTri * 0.22), fGrid * 8.5);
+        const recLC = calcLCForCutoff(fcRecommended);
+
+        filterLSlider.value = recLC.L_mH;
+        filterCSlider.value = recLC.C_uF;
+        requestAnimationFrame(() => {
+          renderLCFilterTab();
+          renderSPWMFilterSection();
+        });
+      });
+
+      btnRestoreSquareLC.addEventListener('click', () => {
+        setFilterToGridPlus10();
+        requestAnimationFrame(() => {
+          renderLCFilterTab();
+          renderSPWMFilterSection();
+        });
+      });
+
+      function drawCarrierAndModulator(canvas, ma, mf) {
+        const { ctx, width, height } = setupHiDPICanvas(canvas);
+        const padLeft = 52, padRight = 18, padTop = 16, padBottom = 24;
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+        const midY = padTop + plotH / 2;
+        const maxScale = 1.55;
+
+        ctx.clearRect(0, 0, width, height);
+        drawGrid(ctx, width, height, padLeft, padRight, padTop, padBottom);
+
+        const yPlus1 = midY - (1.0 / maxScale) * (plotH / 2);
+        const yMinus1 = midY + (1.0 / maxScale) * (plotH / 2);
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(253, 126, 20, 0.35)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(padLeft, yPlus1);
+        ctx.lineTo(padLeft + plotW, yPlus1);
+        ctx.moveTo(padLeft, yMinus1);
+        ctx.lineTo(padLeft + plotW, yMinus1);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = '#212529';
+        ctx.font = 'bold 11px Segoe UI, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('+1.5', padLeft - 6, padTop + 8);
+        ctx.fillText('+1.0', padLeft - 6, yPlus1 + 4);
+        ctx.fillText('0.0', padLeft - 6, midY + 4);
+        ctx.fillText('-1.0', padLeft - 6, yMinus1 + 4);
+        ctx.fillText('-1.5', padLeft - 6, padTop + plotH);
+
+        const samples = 1600;
+
+        ctx.save();
+        ctx.strokeStyle = '#FD7E14';
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        for (let i = 0; i <= samples; i++) {
+          const t = i / samples;
+          const vTri = triangleCarrier(t, mf);
+          const x = padLeft + t * plotW;
+          const y = midY - (vTri / maxScale) * (plotH / 2);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#007BFF';
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        for (let i = 0; i <= samples; i++) {
+          const t = i / samples;
+          const vSin = ma * Math.sin(2 * Math.PI * t);
+          const x = padLeft + t * plotW;
+          const y = midY - (vSin / maxScale) * (plotH / 2);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawBipolarPulses(canvas, ma, mf) {
+        const { ctx, width, height } = setupHiDPICanvas(canvas);
+        const padLeft = 52, padRight = 18, padTop = 16, padBottom = 24;
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+        const midY = padTop + plotH / 2;
+        const ampY = plotH * 0.42;
+
+        ctx.clearRect(0, 0, width, height);
+        drawGrid(ctx, width, height, padLeft, padRight, padTop, padBottom);
+
+        ctx.fillStyle = '#212529';
+        ctx.font = 'bold 11px Segoe UI, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('+Vcc', padLeft - 6, midY - ampY + 4);
+        ctx.fillText('0', padLeft - 6, midY + 4);
+        ctx.fillText('-Vcc', padLeft - 6, midY + ampY + 4);
+
+        const samples = 2000;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(25, 135, 84, 0.13)';
+        ctx.beginPath();
+        ctx.moveTo(padLeft, midY);
+        for (let i = 0; i <= samples; i++) {
+          const t = i / samples;
+          const vSin = ma * Math.sin(2 * Math.PI * t);
+          const vTri = triangleCarrier(t, mf);
+          const pulse = vSin >= vTri ? 1 : -1;
+          const x = padLeft + t * plotW;
+          const y = midY - pulse * ampY;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(padLeft + plotW, midY);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#198754';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        for (let i = 0; i <= samples; i++) {
+          const t = i / samples;
+          const vSin = ma * Math.sin(2 * Math.PI * t);
+          const vTri = triangleCarrier(t, mf);
+          const pulse = vSin >= vTri ? 1 : -1;
+          const x = padLeft + t * plotW;
+          const y = midY - pulse * ampY;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      maSlider.addEventListener('input', () => {
+        requestAnimationFrame(renderSPWM);
+      });
+
+      mfSlider.addEventListener('input', () => {
+        requestAnimationFrame(renderSPWM);
+      });
+
+      maPresets.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          maSlider.value = btn.getAttribute('data-ma');
+          requestAnimationFrame(renderSPWM);
+        });
+      });
+
+      mfPresets.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          mfSlider.value = btn.getAttribute('data-mf');
+          requestAnimationFrame(renderSPWM);
+        });
+      });
+
+      let resizeRafId = null;
+      function redrawAllCanvases() {
+        if (resizeRafId) cancelAnimationFrame(resizeRafId);
+        resizeRafId = requestAnimationFrame(() => {
+          resizeRafId = null;
+          drawTopoOscilloscope(currentTopoProgress);
+          renderLCFilterTab();
+          renderSPWM();
+        });
+      }
+
+      window.addEventListener('resize', redrawAllCanvases);
+
+      if (typeof ResizeObserver !== 'undefined') {
+        const mainEl = document.querySelector('main');
+        if (mainEl) {
+          const ro = new ResizeObserver(() => {
+            redrawAllCanvases();
+          });
+          ro.observe(mainEl);
+        }
+      }
+
+      // Inicialización inmediata
+      setFilterToGridPlus10();
+      drawTopoOscilloscope(0);
+      renderLCFilterTab();
+      renderSPWM();
+    })();
+  </script>
+</body>
+</html>
