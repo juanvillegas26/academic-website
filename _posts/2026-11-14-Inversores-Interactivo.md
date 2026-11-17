@@ -14,7 +14,7 @@ En esta entrada explicamos los conceptos básicos de inversores y su modulación
 Mueve los controles deslizantes a continuación para observar el comportamiento en tiempo real:
 
 <div class="my-4">
-  <iframe src="{{ '/assets/interactive/analogia_hidraulica.html' | relative_url }}" width="100%" height="600px" style="border: 1px solid #ddd; border-radius: 8px;"></iframe>
+  <iframe src="{{ '/assets/interactive/Inversores.html' | relative_url }}" width="100%" height="600px" style="border: 1px solid #ddd; border-radius: 8px;"></iframe>
 </div>
 
 <div class="text-center my-4">
