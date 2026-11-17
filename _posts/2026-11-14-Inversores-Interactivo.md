@@ -4,7 +4,7 @@ title: "Inversores CC/CA: Topologías y Modulación SPWM"
 date: 2026-11-14
 description: "Conceptos básicos de inversores."
 tags: [electricidad, simuladores, docencia]
-categories: [circuitos-electricos]
+categories: [Electrónica de Potencia]
 ---
 
 En esta entrada explicamos los conceptos básicos de inversores y su modulación.
@@ -18,7 +18,7 @@ Mueve los controles deslizantes a continuación para observar el comportamiento 
 </div>
 
 <div class="text-center my-4">
-  <a href="{{ '/assets/interactive/inversores.html' | relative_url }}" target="_blank" class="btn btn-primary btn-lg">
+  <a href="{{ '/assets/interactive/Inversores.html' | relative_url }}" target="_blank" class="btn btn-primary btn-lg">
     🚀 Abrir Simulador en Pantalla Completa
   </a>
 </div>
